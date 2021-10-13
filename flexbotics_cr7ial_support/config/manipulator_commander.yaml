@@ -1,0 +1,5 @@
+default_joint_vel_ratio: 0.5
+default_lin_max_trans_vel: 0.2
+default_lin_max_rot_vel: 1.0
+use_query_services: true
+use_reserved_groups: true

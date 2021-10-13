@@ -1,0 +1,1 @@
+include: 'https://git.code.tecnalia.com/tecnalia_robotics-public/gitlab_templates/raw/master/.gitlab-industrial-ci-kinetic-with-rosinstall.yml'

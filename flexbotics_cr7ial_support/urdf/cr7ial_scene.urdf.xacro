@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<robot name="calibration_scene" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!--world -->
+  <link name="world"/>
+
+  <!-- Import robot -->
+  <xacro:include filename="$(find fanuc_cr7ia_support)/urdf/cr7ial_macro.xacro"/>
+  <xacro:fanuc_cr7ial prefix=""/>
+
+  <!-- Import end effector -->
+  <xacro:include filename="$(find flexbotics_cr7ial_support)/urdf/cr7ial_scan_blend_eff_macro.xacro"/>
+  <xacro:sensors_end_effector prefix=""/>
+
+  <!-- Table where the robot and calibration plane will be placed -->
+  <link name="table">
+    <visual>
+      <origin xyz="1.0 0.0 0.4"/>
+      <geometry>
+        <box size="2.0 1.0 0.8"/>
+      </geometry>
+      <material name="table_color">
+        <color rgba="0 ${200/255} ${200/255} 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.0 0.0 0.4"/>
+      <geometry>
+        <box size="2.0 1.0 0.8"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Place table in world -->
+  <joint name="table_to_world" type="fixed">
+    <parent link="world"/>
+    <child link="table"/>
+  </joint>
+
+  <!-- Place robot on top of the table -->
+  <joint name="base_to_table" type="fixed">
+    <parent link="table"/>
+    <child link="base_link"/>
+    <origin xyz="0.4 0.0 0.8" rpy="0.0 0.0 0.0"/>
+  </joint>
+
+  <!-- Place sensors end effector on robot flange -->
+  <joint name="robot_tool0_to_sensors_eff" type="fixed">
+    <parent link="tool0"/>
+    <child link="eff_frame"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Camera -->
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+  <xacro:sensor_d435 name="camera" parent="sensors_assembly">
+	  <origin xyz="0 0.139 0.13" rpy="3.14 -0.031 1.582" />
+	</xacro:sensor_d435>
+
+</robot>

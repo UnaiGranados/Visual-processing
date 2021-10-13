@@ -1,0 +1,21 @@
+- git:
+    local-name: algebra_libraries
+    uri: git@git.code.tecnalia.com:tecnalia_robotics/algebra_libraries.git
+    version: melodic-devel
+
+- git:
+    local-name: manipulation
+    uri: git@git.code.tecnalia.com:tecnalia_robotics/manipulation.git
+    version: kinetic-devel
+
+- git:
+    local-name: fanuc
+    uri: https://github.com/ros-industrial/fanuc.git
+    version: melodic-devel
+
+- git:
+    local-name: realsense-ros
+    uri: https://github.com/IntelRealSense/realsense-ros.git
+    version: 2.3.1
+
+

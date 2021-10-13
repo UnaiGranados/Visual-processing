@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="sensors_end_effector" params="prefix">
+
+    <!-- "base" link of the sensors_end_effector -->
+    <link name="${prefix}eff_frame"/>
+
+    <!-- ZIVID and Quelltech end-effector assembly STL -->
+    <link name="${prefix}sensors_assembly">
+    <visual>
+      <geometry>
+        <mesh filename="package://flexbotics_cr7ial_support/meshes/scan_blend_end_effector_simplified.stl"/>
+      </geometry>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://flexbotics_cr7ial_support/meshes/scan_blend_end_effector_lowres.stl"/>
+      </geometry>
+    </collision>
+    </link>
+
+    <!-- Place assembly at the origin of the end effector -->
+    <joint name="${prefix}eff_to_sensors_assembly" type="fixed">
+      <parent link="${prefix}eff_frame"/>
+      <child link="${prefix}sensors_assembly"/>
+      <origin xyz="0 0 0" rpy="0 0 ${3.0*pi/2.0-0.36}"/>
+    </joint>
+
+    <!-- Quelltech frames -->
+    <link name="${prefix}quelltech_sensor_optical_frame"/>
+    <joint name="${prefix}eff_to_quelltech_sensor_optical_frame" type="fixed">
+      <parent link="${prefix}eff_frame"/>
+      <child link="${prefix}quelltech_sensor_optical_frame"/>
+      <origin xyz="0.159 -0.075 0.188" rpy="0.360 ${pi/2.0} 0"/>
+    </joint>
+    <link name="${prefix}laser_origin"/>
+    <joint name="${prefix}eff_to_laser_origin" type="fixed">
+      <parent link="${prefix}eff_frame"/>
+      <child link="${prefix}laser_origin"/>
+      <origin xyz="0.109 -0.056 0.168" rpy="0.360 ${pi/2.0} 0"/>
+    </joint>
+
+  </xacro:macro>
+</robot>

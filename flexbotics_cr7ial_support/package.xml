@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>flexbotics_cr7ial_support</name>
+  <version>0.0.1</version>
+  <description>
+      URDF of a scene with a FANUC CR-7iA/L robot and configuration files for use with the manipulator_commander package.
+  </description>
+
+  <author>Jon Oñativia</author>
+  <maintainer email="jon.onativia@tecnalia.com">Jon Oñativia</maintainer>
+
+  <license>TRI</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>fanuc_cr7ia_support</exec_depend>
+  <exec_depend>flexbotics_cr7ial_moveit_config</exec_depend>
+  <exec_depend>industrial_robot_simulator</exec_depend>
+  <exec_depend>manipulator_controller</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz</exec_depend>
+  <exec_depend>realsense-ros</exec_depend>
+
+  <test_depend>roslaunch</test_depend>
+
+</package>
