@@ -1,6 +1,6 @@
-# Vision based robot control in ROS
+# Vision based robot control (Visual servoing)  in ROS
 
-This ROS metapackage contains camera calibration tools and specific robot setup configuration files.
+This ROS metapackage contains camera calibration tools, specific robot setup configuration files and visual servoing files.
 
 ## 1. Dependencies
 
@@ -47,7 +47,7 @@ $ cd <ws_folder>
 <ws_folder>/src $ wstool merge <package_folder>/.rosinstall
 ```
 
-### 2.5. Clone repositories defined in the `.rosinstall` file
+### 2.5. Clone repositories defined in the `.rosinstall` file                                                                                                                                                                                                                                                                                                                    
 
 ```shell
 <ws_folder>/src $ wstool update -t .
@@ -69,13 +69,12 @@ Before running `rosdep install` make sure lists are updated with `sudo apt updat
 
 ## 3. Structure
 
-This is a set of packages to perform laser scanner calibration and validation. Only FANUC CR-7iA/L robot and Quelltech Q4 laser scanner have been tested so far. However, it is intended to extend these tools to some additional robots and laser scanners. The current implementation includes the following three main packages:
+This is a set of packages to perform a visual servoing. The current implementation includes the following three main packages:
 
 * `flexbotics_cr7ial_support`: configuration, scene URDF and launch files for the FANUC CR-7iA/L robot.
 * `flexbotics_cr7ial_moveit_config`: *MoveIt! Setup Assistant* generated package.
-* `laser_calibration`: this is where the nodes that perform the actual work are implemented.
 
-There are another two packcages that are not directly related to calibration but contain nodes that might be useful for someone making use of the same elements (FANUC CR-7iA/L robot and Quelltech Q4 laser scanner):
+There are another  packcage that  contain nodes for visual servoing:
 
 * `laser_calibration_sandbox`: some dummy tests with the laser and `the manipulator_commander` package.
 * `laser_scan`: a simple node that exposes two services `/laser_scan_node/start_capturing` and `/laser_scan_node/stop_capturing` to capture laser readings and robot poses. The node starts capturing data when the `start_capturing` service is called and stops capturing and publishes a point cloud of the captured data on the `/laser_scan_node/pointcloud` topic when the `stop_capturing` service is called.
@@ -96,28 +95,17 @@ By default, the scene will be launched with a simulated robot making use of the 
 $ roslaunch flexbotics_cr7ial_support set_up_cr7ial_scene.launch use_sim:=false
 ```
 
-
-```shell
-$ rosrun laser_calibration_sandbox calib_test_manipulator_node
-```
-
 For instructions about how to use the real robot see the [tecnalia_robotics/fanuc/Documentation](https://git.code.tecnalia.com/tecnalia_robotics/fanuc/documentation) repository.
 
 ### 4.2. Camera calibrator 
 
-There is a dummy program that has been implemented in a node to test the Quelltech Q4 laser scanner. First, launch the driver with the following launchfile:
+There is a package that has been implemented to calibrate the RealSense D435 depth camera, see the [tecnalia_robotics/flexbotics_calibration_suite](https://git.code.tecnalia.com/tecnalia_robotics/flexbotics_calibration_suite) repository.
+
+First, launch the following launchfile:
 
 ```shell
-$ roslaunch laser_calibration calib_quelltech_laser.launch
+$ roslaunch flexbotics_calibration_suite flexbotics_calibration_suite.launch
 ```
-
-By default, the driver is launched is simulation mode. To use the real device add the `sim_laser:=false` argument to the previous command. Then, the dummy node can be launched:
-
-```shell
-$ rosrun laser_calibration_sandbox calib_test_quelltech_node
-```
-
-This node activates the laser and performs readings during 5 seconds. Laser readings correspond to profiles where data is stored in the form of points in the X-Z plane. At the end of the program a PCL visualizer is launched where all the captured profiles are displayed stacked along the Y-axis.
 
 ### 4.3. Visual servoing
 
