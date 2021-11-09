@@ -1,0 +1,7 @@
+set(tf_helper_functions_SETUP_PY_SETUP_MODULE "distutils.core")
+set(tf_helper_functions_SETUP_PY_VERSION "1.0.0")
+set(tf_helper_functions_SETUP_PY_SCRIPTS "")
+set(tf_helper_functions_SETUP_PY_PACKAGES "tf_helper_functions")
+set(tf_helper_functions_SETUP_PY_PACKAGE_DIRS "src/tf_helper_functions")
+set(tf_helper_functions_SETUP_PY_MODULES "")
+set(tf_helper_functions_SETUP_PY_MODULE_DIRS "")

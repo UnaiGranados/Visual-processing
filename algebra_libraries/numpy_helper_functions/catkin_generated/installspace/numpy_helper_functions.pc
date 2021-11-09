@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: numpy_helper_functions
+Description: Description of numpy_helper_functions
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

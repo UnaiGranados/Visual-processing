@@ -67,6 +67,10 @@
   <!-- RealSense camera  -->
   <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
 
+  <!-- Load internal camera calibration intrinsics  -->
+  <include file="$(find publisher_subscriber)/launch/publisher_subscriber.launch"/>
+
+
   <!-- arguments for the RealSense urdf xacro file, rviz visualization and namespace -->
   <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find realsense2_description)/rviz/urdf.rviz" required="true" /> -->
 

@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: eigen_helper_functions
+Description: Description of eigen_helper_functions
+Version: 1.0.0
+Cflags: -I${prefix}/include -I/usr/include/eigen3
+Libs: -L${prefix}/lib -leigen_helper_functions
+Requires: 

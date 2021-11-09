@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: geometry_msgs_helper_functions
+Description: Description of geometry_msgs_helper_functions
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: geometry_msgs tf

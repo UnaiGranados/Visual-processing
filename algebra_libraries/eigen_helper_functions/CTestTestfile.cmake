@@ -1,0 +1,8 @@
+# CMake generated Testfile for 
+# Source directory: /home/tecnalia/workspace/fanuc_3D_cam_ws/src/algebra_libraries/eigen_helper_functions
+# Build directory: /home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/algebra_libraries/eigen_helper_functions
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+add_test(_ctest_eigen_helper_functions_gtest_test_diff_add_delta "/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/catkin_generated/env_cached.sh" "/usr/bin/python2" "/opt/ros/melodic/share/catkin/cmake/test/run_tests.py" "/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/test_results/eigen_helper_functions/gtest-test_diff_add_delta.xml" "--return-code" "/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/devel/lib/eigen_helper_functions/test_diff_add_delta --gtest_output=xml:/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/test_results/eigen_helper_functions/gtest-test_diff_add_delta.xml")
+add_test(_ctest_eigen_helper_functions_gtest_test_pseudoinverses "/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/catkin_generated/env_cached.sh" "/usr/bin/python2" "/opt/ros/melodic/share/catkin/cmake/test/run_tests.py" "/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/test_results/eigen_helper_functions/gtest-test_pseudoinverses.xml" "--return-code" "/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/devel/lib/eigen_helper_functions/test_pseudoinverses --gtest_output=xml:/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/test_results/eigen_helper_functions/gtest-test_pseudoinverses.xml")

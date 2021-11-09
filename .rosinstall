@@ -5,7 +5,7 @@
 
 - git:
     local-name: manipulation
-    uri: git@git.code.tecnalia.com:tecnalia_robotics/manipulation.git
+    uri: git@git.code.tecnalia.com:tecnalia_robotics/flexbotics/manipulation.git
     version: kinetic-devel
 
 - git:

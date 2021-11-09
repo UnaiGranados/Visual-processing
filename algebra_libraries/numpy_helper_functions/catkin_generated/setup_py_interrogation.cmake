@@ -1,0 +1,7 @@
+set(numpy_helper_functions_SETUP_PY_SETUP_MODULE "distutils.core")
+set(numpy_helper_functions_SETUP_PY_VERSION "1.0.0")
+set(numpy_helper_functions_SETUP_PY_SCRIPTS "")
+set(numpy_helper_functions_SETUP_PY_PACKAGES "numpy_helper_functions")
+set(numpy_helper_functions_SETUP_PY_PACKAGE_DIRS "src/numpy_helper_functions")
+set(numpy_helper_functions_SETUP_PY_MODULES "")
+set(numpy_helper_functions_SETUP_PY_MODULE_DIRS "")
