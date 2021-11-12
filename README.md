@@ -1,6 +1,6 @@
 # Vision based robot control (Visual servoing)  in ROS
 
-This ROS metapackage contains camera calibration tools, specific robot setup configuration files and visual servoing files.
+This ROS metapackage contains specific robot setup configuration files and visual servoing files.
 
 ## 1. Dependencies
 
@@ -106,6 +106,7 @@ First, launch the following launchfile:
 ```shell
 $ roslaunch flexbotics_calibration_suite flexbotics_calibration_suite.launch
 ```
+With this launch, a GUI will open.Then choose the type of calibration needed and start the the calibration procedure. [manipulator_commander] is needed for the calibration.
 
 ### 4.3. Visual servoing
 

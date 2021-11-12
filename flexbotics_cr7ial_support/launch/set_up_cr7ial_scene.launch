@@ -15,7 +15,7 @@
   <!-- FANUC CR-7iA/L configuration and scene URDF -->
   <param name="robot_name" value="$(arg robot_name)"/>
   <param name="$(arg robot_description)" command="$(find xacro)/xacro '$(find flexbotics_cr7ial_support)/urdf/cr7ial_scene.urdf.xacro'" />
-  <param name="$(arg robot_description)_semantic" textfile="$(find flexbotics_cr7ial_moveit_config)/config/calibration_scene.srdf" />
+  <param name="$(arg robot_description)_semantic" textfile="$(find flexbotics_cr7ial_moveit_config_2)/config/calibration_scene.srdf" />
   <rosparam command="load" file="$(find fanuc_cr7ia_support)/config/joint_names_cr7ial.yaml" />
 
   <!-- Launch MoveIt! -->
@@ -23,14 +23,14 @@
 
     <!-- Planning context -->
     <group ns="$(arg robot_description)_planning">
-      <rosparam command="load" file="$(find flexbotics_cr7ial_moveit_config)/config/joint_limits.yaml"/>
+      <rosparam command="load" file="$(find flexbotics_cr7ial_moveit_config_2)/config/joint_limits.yaml"/>
     </group>
     <group ns="$(arg robot_description)_kinematics">
-      <rosparam command="load" file="$(find flexbotics_cr7ial_moveit_config)/config/kinematics.yaml"/>
+      <rosparam command="load" file="$(find flexbotics_cr7ial_moveit_config_2)/config/kinematics.yaml"/>
     </group>
 
     <!-- Move group -->
-    <include file="$(find flexbotics_cr7ial_moveit_config)/launch/move_group.launch"/>
+    <include file="$(find flexbotics_cr7ial_moveit_config_2)/launch/move_group.launch"/>
   </group>
 
   <!-- Launch the robot_state_publisher node -->
@@ -67,7 +67,14 @@
   <!-- RealSense camera  -->
   <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
 
+  <!-- Load internal camera calibration intrinsics  -->
+  <include file="$(find publisher_subscriber)/launch/publisher_subscriber.launch"/>
+
+  <!-- camera -->
+  <node pkg="tf" type="static_transform_publisher" name="arm_camera_to_flange" args="0.13 -0.079 0.118 1.224 -0.005 1.539 tool0 camera_color_optical_frame 100"/>
+  <!-- <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/> -->
+
   <!-- arguments for the RealSense urdf xacro file, rviz visualization and namespace -->
   <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find realsense2_description)/rviz/urdf.rviz" required="true" /> -->
-
+    
 </launch>
