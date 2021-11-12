@@ -1,7 +1,0 @@
-set(geometry_msgs_helper_functions_SETUP_PY_SETUP_MODULE "distutils.core")
-set(geometry_msgs_helper_functions_SETUP_PY_VERSION "1.0.0")
-set(geometry_msgs_helper_functions_SETUP_PY_SCRIPTS "")
-set(geometry_msgs_helper_functions_SETUP_PY_PACKAGES "geometry_msgs_helper_functions")
-set(geometry_msgs_helper_functions_SETUP_PY_PACKAGE_DIRS "src/geometry_msgs_helper_functions")
-set(geometry_msgs_helper_functions_SETUP_PY_MODULES "")
-set(geometry_msgs_helper_functions_SETUP_PY_MODULE_DIRS "")

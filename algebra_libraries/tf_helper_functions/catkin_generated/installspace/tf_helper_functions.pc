@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: tf_helper_functions
-Description: Description of tf_helper_functions
-Version: 1.0.0
-Cflags: -I${prefix}/include
-Libs: -L${prefix}/lib 
-Requires: message_runtime geometry_msgs
