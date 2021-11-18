@@ -68,7 +68,7 @@
   <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
 
   <!-- Load internal camera calibration intrinsics  -->
-  <include file="$(find publisher_subscriber)/launch/publisher_subscriber.launch"/>
+  <include file="$(find visual_processing)/launch/visual_processing.launch"/>
 
   <!-- camera -->
   <node pkg="tf" type="static_transform_publisher" name="arm_camera_to_flange" args="0.13 -0.079 0.118 1.224 -0.005 1.539 tool0 camera_color_optical_frame 100"/>

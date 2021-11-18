@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
 
-    <rosparam  file="$(find publisher_subscriber)/config/realsense_internal_intrinsic.yaml"/>
+    <rosparam  file="$(find visual_processing)/config/realsense_internal_intrinsic.yaml"/>
 
 </launch>
