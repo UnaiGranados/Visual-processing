@@ -1,12 +1,12 @@
-<?xml version="1.0" ?>
-<robot name="calibration_scene" xmlns:xacro="http://ros.org/wiki/xacro">
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="calibration_scene">
 
   <!--world -->
   <link name="world"/>
 
-  <!-- Import robot -->
-  <xacro:include filename="$(find fanuc_cr7ia_support)/urdf/cr7ial_macro.xacro"/>
-  <xacro:fanuc_cr7ial prefix=""/>
+  <!-- Import robot model macro and instantiate -->
+  <xacro:include filename="$(find fanuc_cr7ial_gazebo_support)/urdf/fanuc_cr7ial_gazebo.xacro" />
+  <xacro:fanuc_cr7ial prefix="" />
 
   <!-- Import end effector -->
   <xacro:include filename="$(find flexbotics_cr7ial_support)/urdf/cr7ial_scan_blend_eff_macro.xacro"/>
@@ -38,8 +38,8 @@
   </joint>
 
   <!-- Place robot on top of the table -->
-  <joint name="base_to_table" type="fixed">
-    <parent link="table"/>
+  <joint name="world " type="fixed">
+    <parent link="world"/>
     <child link="base_link"/>
     <origin xyz="0.4 0.0 0.8" rpy="0.0 0.0 0.0"/>
   </joint>
@@ -53,9 +53,15 @@
 
   <!-- Camera -->
   <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
-  <xacro:sensor_d435 name="camera" parent="tool0" use_nominal_extrinsics="true">
+  <xacro:sensor_d435 name="camera" parent="tool0" >
 	  <origin xyz="0.13 -0.045 0.13" rpy="3.14 -0.031 -0.34" />
-    <!-- <origin xyz="0.06 -0.05 0.041" rpy="-0.061 -0.068 1.564" /> -->
 	</xacro:sensor_d435>
+
+  <gazebo reference="camera_link">
+    <turnGravityOff>true</turnGravityOff>
+  </gazebo>
+
+  <!-- Add Gazebo ROS-control (include only once in your project) -->
+  <xacro:include filename="$(find fanuc_gazebo_common)/urdf/fanuc_ros_control_gazebo.xacro" />
 
 </robot>

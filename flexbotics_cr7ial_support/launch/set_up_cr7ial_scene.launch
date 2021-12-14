@@ -3,8 +3,9 @@
 
   <!-- Input arguments. If "use_sim" not specified will run in simulation mode -->
   <arg name="use_sim" default="true" />
+  <arg name="use_gazebo" default="true" />
   <arg name="use_moveit" default="false" />
-  <arg name="use_mc" default="true" />
+  <arg name="use_mc" default="false" />
   <arg name="robot_ip" unless="$(arg use_sim)" default="192.168.0.2"/>
   <arg name="launch_rviz" default="true" />
   <arg name="rviz_config" default="$(find flexbotics_cr7ial_support)/launch/cr7ial_scene.rviz" />
@@ -30,15 +31,49 @@
     </group>
 
     <!-- Move group -->
-    <include file="$(find flexbotics_cr7ial_moveit_config_2)/launch/move_group.launch"/>
+    <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
+    <include file="$(find flexbotics_cr7ial_moveit_config_2)/launch/move_group.launch">
+      <arg name="allow_trajectory_execution" value="true"/>
+      <arg name="fake_execution" value="false"/>
+      <arg name="execution_type" value="interpolate"/>
+      <arg name="info" value="true"/>
+      <arg name="pipeline" value="ompl"/>
+      <!-- <arg name="load_robot_description" value="$(arg load_robot_description)"/> -->
+    </include>
   </group>
 
   <!-- Launch the robot_state_publisher node -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
-  <!-- Simulated robot setup -->
+  <!-- Simulated robot setup (Gazebo or industrial simulator)-->
   <group if="$(arg use_sim)">
-    <include file="$(find industrial_robot_simulator)/launch/robot_interface_simulator.launch"/>
+
+    <!-- Gazebo -->
+    <group if="$(arg use_gazebo)">
+      <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="debug" value="false" />
+      <arg name="gui" value="true" />
+      <arg name="paused" value="false" />
+      <arg name="use_sim_time" value="true" />
+      <arg name="headless" value="false" />
+      <arg name="world_name" default="$(find fanuc_cr7ial_gazebo_support)/worlds/fanuc.world"/>
+      </include>
+
+      <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+      <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-param robot_description -urdf -model calibration_scene" />
+
+      <rosparam command="load" file="$(find fanuc_cr7ial_gazebo_support)/config/gazebo_manipulator_control.yaml" />
+      <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="spawn fanuc_cr7ial_controller" />
+
+      <rosparam command="load" file="$(find fanuc_cr7ial_gazebo_support)/config/joint_state_controller.yaml" />
+      <node name="joint_state_controller_spawner" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="spawn joint_state_controller" />
+
+    </group>
+
+    <group unless="$(arg use_gazebo)">
+      <include file="$(find industrial_robot_simulator)/launch/robot_interface_simulator.launch"/>
+    </group>
+
   </group>
 
   <!-- Real robot setup -->
@@ -65,7 +100,10 @@
   </group>
 
   <!-- RealSense camera  -->
-  <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <arg name="align_depth" value="true"/>
+    <arg name="filters" value="pointcloud"/>
+  </include>
 
   <!-- Load internal camera calibration intrinsics  -->
   <include file="$(find visual_processing)/launch/visual_processing.launch"/>
@@ -78,3 +116,4 @@
   <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find realsense2_description)/rviz/urdf.rviz" required="true" /> -->
     
 </launch>
+
