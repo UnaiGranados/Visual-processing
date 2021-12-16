@@ -9,6 +9,7 @@
   <arg name="robot_ip" unless="$(arg use_sim)" default="192.168.0.2"/>
   <arg name="launch_rviz" default="true" />
   <arg name="rviz_config" default="$(find flexbotics_cr7ial_support)/launch/cr7ial_scene.rviz" />
+  <arg name="use_rs_gazebo" default="true" />
 
   <arg name="robot_name" value="calibration_scene"/>
   <arg name="robot_description" default="robot_description"/>
@@ -100,10 +101,12 @@
   </group>
 
   <!-- RealSense camera  -->
-  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-    <arg name="align_depth" value="true"/>
-    <arg name="filters" value="pointcloud"/>
-  </include>
+  <group unless="$(arg use_rs_gazebo)">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <arg name="align_depth" value="true"/>
+      <arg name="filters" value="pointcloud"/>
+    </include>
+  </group>
 
   <!-- Load internal camera calibration intrinsics  -->
   <include file="$(find visual_processing)/launch/visual_processing.launch"/>
@@ -111,6 +114,10 @@
   <!-- camera -->
   <node pkg="tf" type="static_transform_publisher" name="arm_camera_to_flange" args="0.13 -0.079 0.118 1.224 -0.005 1.539 tool0 camera_color_optical_frame 100"/>
   <!-- <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/> -->
+
+  <!-- Move group -->
+  <node name="moveit_move_group" pkg="visual_processing" type="moveit_move_group.py" respawn="false" output="screen">
+  </node> 
 
   <!-- arguments for the RealSense urdf xacro file, rviz visualization and namespace -->
   <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find realsense2_description)/rviz/urdf.rviz" required="true" /> -->

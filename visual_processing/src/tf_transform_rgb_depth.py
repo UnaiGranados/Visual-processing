@@ -63,13 +63,14 @@ def my_callback(img, pub):
     # br.sendTransform()
 
 def my_callback_2(img_depth, pub):
-    rospy.loginfo("New image, size = " + str(img_depth.height) + " x " + str(img_depth.width) + ", encoding = " + img_depth.encoding)
+    rospy.loginfo("New image, size = " + str(img_depth.width) + " x " + str(img_depth.height) + ", encoding = " + img_depth.encoding)
     cv_image = CvBridge().imgmsg_to_cv2(img_depth, desired_encoding="rgb8")
-    
+    depth_array=np.array(cv_image, dtype=np.float32)
+    rospy.loginfo(depth_array)
 
     #publish a OpenCV image to a Ros message
-    imgmsg_image = CvBridge().cv2_to_imgmsg(cv_image, encoding="rgb8")
-    pub.publish(imgmsg_image)
+    # imgmsg_image = CvBridge().cv2_to_imgmsg(cv_image, encoding="rgb8")
+    # pub.publish(imgmsg_image)
 
     # br=tf.TransformBroadcaster()
     # br.sendTransform()
@@ -79,7 +80,7 @@ if __name__ == '__main__':
    pub = rospy.Publisher('/my_apriltag_img', Image, queue_size=10)
    pub_depth=rospy.Publisher('/depth',Image, queue_size=10)
    image_rgb_sub = rospy.Subscriber('/camera/color/image_raw', Image, my_callback, callback_args=pub)
-   image_depth_sub = rospy.Subscriber('/camera/depth/image_rect_raw', Image, my_callback_2, callback_args=pub)
+   image_depth_sub = rospy.Subscriber('/camera/aligned_depth_to_color/image_raw', Image, my_callback_2, callback_args=pub)
    #image_sub = message_filters.Subscriber("image", Image)
    #depth_sub = message_filters.Subscriber("depth_image", Image)
    #sync = message_filters.TimeSynchronizer([image_sub, depth_sub], 1)

@@ -15,7 +15,7 @@
   <!-- Table where the robot and calibration plane will be placed -->
   <link name="table">
     <visual>
-      <origin xyz="1.0 0.0 0.4"/>
+      <origin xyz="0.5 0.0 0.4"/>
       <geometry>
         <box size="2.0 1.0 0.8"/>
       </geometry>
@@ -24,7 +24,7 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="1.0 0.0 0.4"/>
+      <origin xyz="0.5 0.0 0.4"/>
       <geometry>
         <box size="2.0 1.0 0.8"/>
       </geometry>
@@ -41,7 +41,7 @@
   <joint name="world " type="fixed">
     <parent link="world"/>
     <child link="base_link"/>
-    <origin xyz="0.4 0.0 0.8" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0 0.0 0.8" rpy="0.0 0.0 0.0"/>
   </joint>
 
   <!-- Place sensors end effector on robot flange -->

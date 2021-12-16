@@ -22,8 +22,8 @@ joint_state_controller:
   type: joint_state_controller/JointStateController
   publish_rate: 50
 controller_list:
-  - name: ""
-    action_ns: joint_trajectory_action
+  - name: fanuc_cr7ial_controller
+    action_ns: follow_joint_trajectory
     default: True
     type: FollowJointTrajectory
     joints:

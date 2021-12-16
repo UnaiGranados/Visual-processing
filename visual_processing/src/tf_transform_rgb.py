@@ -37,7 +37,7 @@ def my_callback(img, pub):
     #Detect tags in OpenCV 
     cv_image = CvBridge().imgmsg_to_cv2(img, desired_encoding="rgb8")
     gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
-    options = apriltag.DetectorOptions(families="tag36h11")
+    options = apriltag.DetectorOptions(families="tag36h11, tag25h9, tag16h5")
     detector = apriltag.Detector(options)
     results = detector.detect(gray)
 
@@ -75,7 +75,15 @@ def my_callback(img, pub):
         cv2.circle(cv_image, (cX, cY), 5, (0, 255, 255), -1)
 
         #Define coordinate system in the center of the tag model
-        w=h=0.083 #m
+        if (tagFamily=="tag36h11"):
+            w=h=0.083 #m
+        
+        if (tagFamily=="tag25h9"):
+            w=h=0.05 #m
+        
+        if (tagFamily=="tag16h5"):
+            w=h=0.117 #m
+        
         A_modelo=[w/2,-h/2,0] 
         B_modelo=[-w/2,-h/2,0] 
         C_modelo=[-w/2,h/2,0]
