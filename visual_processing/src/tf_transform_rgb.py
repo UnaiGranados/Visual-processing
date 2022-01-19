@@ -32,7 +32,7 @@ def my_callback(img, pub):
     #Read the  image size, encoding parameters and camera instrinsic parameters
     rospy.loginfo("New image, size = " + str(img.height) + " x " + str(img.width) + ", encoding = " + img.encoding)
     K=np.array(rospy.get_param("/camera_matrix/data")).reshape((3,3))
-    print("Camera intrinsic parameters:"+str(K))
+    print("Camera intrinsic parameters:"+ str(K))
 
     #Detect tags in OpenCV 
     cv_image = CvBridge().imgmsg_to_cv2(img, desired_encoding="rgb8")
@@ -46,6 +46,10 @@ def my_callback(img, pub):
     i = 1
     for r in results:
 
+        tagID = r.tag_id
+        if tagID != 0:
+            continue
+
         # extract the bounding box (x, y)-coordinates for the AprilTag and convert each of the (x, y)-coordinate pairs to integers
         (ptA, ptB, ptC, ptD) = r.corners
         ptB = (int(ptB[0]), int(ptB[1]))
@@ -55,10 +59,14 @@ def my_callback(img, pub):
 
         # draw the tag family on the image
         tagFamily = r.tag_family.decode("utf-8")
-        cv2.putText(cv_image, tagFamily, (ptA[0], ptA[1] - 15),
-        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        
+        cv2.putText(cv_image, tagFamily, (ptA[0] - 30, ptA[1] - 25),
+        cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 0), 2)
+        cv2.putText(cv_image,  "ID:" + str(tagID), (ptA[0] - 30, ptA[1] - 5),
+        cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 0, 255), 2)
 
         print("[INFO] tag family: {}".format(tagFamily))
+        print("[INFO] tag ID: {}".format(tagID))
         print("A = (" + str(ptA[0]) + ", " + str(ptA[1]) + ")")
         print("B = (" + str(ptB[0]) + ", " + str(ptB[1]) + ")")
         print("C = (" + str(ptC[0]) + ", " + str(ptC[1]) + ")")

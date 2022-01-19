@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
 
-    <rosparam  file="$(find visual_processing)/config/realsense_internal_intrinsic.yaml"/>
+    <rosparam  file="$(find visual_processing)/config/realsense_gazebo_intrinsic.yaml"/>
 
 </launch>
