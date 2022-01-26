@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 from numpy.core.records import array
 import message_filters
 import cv2
@@ -12,6 +13,8 @@ from geometry_msgs.msg import TransformStamped
 import numpy as np
 import imutils
 import matplotlib.pyplot as plt  
+import yaml
+from colorama import Fore, Back, Style
 
 class RealSense(object):
     def __init__(self):
@@ -25,8 +28,47 @@ class RealSense(object):
         # Node is subscribing to the /depth_to_rgb/image_raw topic
         self.depth_sub = message_filters.Subscriber('/camera/aligned_depth_to_color/image_raw', Image)
 
+    def publish_transform(self, transf, base_link, child_link, time_stamp):
+        br = tf2_ros.TransformBroadcaster()
+        tf_msg = TransformStamped()
+        tf_msg.header.stamp = time_stamp
+        tf_msg.header.frame_id = base_link
+        tf_msg.child_frame_id = child_link
+        tf_msg.transform.translation.x = transf[0, 3]
+        tf_msg.transform.translation.y = transf[1, 3]
+        tf_msg.transform.translation.z = transf[2, 3]
+        q = pyq.Quaternion(matrix=transf[0:3, 0:3])
+        tf_msg.transform.rotation.w = q[0]
+        tf_msg.transform.rotation.x = q[1]
+        tf_msg.transform.rotation.y = q[2]
+        tf_msg.transform.rotation.z = q[3]
+        br.sendTransform(tf_msg)
 
     def callback(self, ros_rgb, ros_depth):
+
+        
+        if  rospy.get_param("/use_rs_gazebo")=="true":
+
+            # Read camera intrinsic calibration matrix
+            with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_gazebo_intrinsic.yaml', 'r') as file:
+                camera_parameters = yaml.load(file)
+                intrinsic_parameters = camera_parameters["camera_matrix"]["data"]
+            K=np.array(intrinsic_parameters).reshape((3,3))
+            print("Camera intrinsic parameters:"+ str(K))
+
+        else:
+            # Read camera intrinsic calibration matrix
+            with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_internal_intrinsic.yaml', 'r') as file:
+                camera_parameters = yaml.load(file)
+                intrinsic_parameters = camera_parameters["camera_matrix"]["data"]
+            K=np.array(intrinsic_parameters).reshape((3,3))
+            print("Camera intrinsic parameters:"+ str(K))
+
+        K=np.array(rospy.get_param("/camera_matrix/data")).reshape((3,3))
+        f_x=K[0,0]
+        f_y=K[1,1]
+        c_x=K[0,2]
+        c_y=K[1,2]
 
         rospy.loginfo("New rgb image, size = " + str(ros_rgb.width) + " x " + str(ros_rgb.height) + ", encoding = " + ros_rgb.encoding)
         rospy.loginfo("New depth image, size = " + str(ros_depth.width) + " x " + str(ros_depth.height) + ", encoding = " + ros_depth.encoding)
@@ -51,6 +93,10 @@ class RealSense(object):
         i = 1
         for r in results:
 
+            tagID = r.tag_id
+            if tagID != 0:
+                continue
+
             # extract the bounding box (x, y)-coordinates for the AprilTag and convert each of the (x, y)-coordinate pairs to integers
             (ptA, ptB, ptC, ptD) = r.corners
             ptB = (int(ptB[0]), int(ptB[1]))
@@ -60,16 +106,11 @@ class RealSense(object):
 
             # draw the tag family on the image
             tagFamily = r.tag_family.decode("utf-8")
-            cv2.putText(rgb_frame, tagFamily, (ptA[0], ptA[1] - 15),
-            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-            print("[INFO] tag family: {}".format(tagFamily))
-            print("A = (" + str(ptA[0]) + ", " + str(ptA[1]))
-            if ptA[0] >= 0 and ptA[0] < ros_depth.height and ptA[1] >= 0 and ptA[1] < ros_depth.width:
-                print(" --> depth = " + str(depth_frame[ptA[0], ptA[1]]))
-            print("B = (" + str(ptB[0]) + ", " + str(ptB[1]) + ")")
-            print("C = (" + str(ptC[0]) + ", " + str(ptC[1]) + ")")
-            print("D = (" + str(ptD[0]) + ", " + str(ptD[1]) + ")")
+            cv2.putText(rgb_frame, tagFamily, (ptA[0] - 30, ptA[1] - 25),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 0), 2)
+            cv2.putText(rgb_frame,  "ID:" + str(tagID), (ptA[0] - 30, ptA[1] - 5),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 0, 255), 2)
 
             # draw the bounding box of the AprilTag detection
             cv2.line(rgb_frame, ptA, ptB, (255, 255, 0), 2)
@@ -82,9 +123,66 @@ class RealSense(object):
             (cX, cY) = (int(r.center[0]), int(r.center[1]))
             cv2.circle(rgb_frame, (cX, cY), 5, (0, 255, 255), -1)
 
+            print("[INFO] tag family: {}".format(tagFamily))
+            print(Fore.YELLOW + "A = (" + str(ptA[0]) + ", " + str(ptA[1])+ ")")
+            if ptA[0] >= 0 and ptA[0] < ros_depth.height and ptA[1] >= 0 and ptA[1] < ros_depth.width:
+                print(" --> depth = " + str(depth_frame[ptA[0], ptA[1]]))
+                X_A_Cam= (depth_frame[ptA[0], ptA[1]] * ((ptA[0])-c_x))/f_x
+                Y_A_Cam= (depth_frame[ptA[0], ptA[1]] * ((ptA[1])-c_y))/f_y
+                ptA_Cam=(X_A_Cam,Y_A_Cam, depth_frame[ptA[0], ptA[1]])
+                print("Punto A respecto a la camara:" + str(ptA_Cam))
+            print("B = (" + str(ptB[0]) + ", " + str(ptB[1]) + ")",)
+            if ptB[0] >= 0 and ptB[0] < ros_depth.height and ptB[1] >= 0 and ptB[1] < ros_depth.width:
+                print(" --> depth = " + str(depth_frame[ptB[0], ptB[1]]))
+                X_B_Cam= (depth_frame[ptB[0], ptB[1]] * ((ptB[0])-c_x))/f_x
+                Y_B_Cam= (depth_frame[ptB[0], ptB[1]] * ((ptB[1])-c_y))/f_y
+                ptB_Cam=(X_B_Cam,Y_B_Cam, depth_frame[ptB[0], ptB[1]])
+                print("Punto B respecto a la camara:" + str(ptB_Cam))
+            print("C = (" + str(ptC[0]) + ", " + str(ptC[1]) + ")",)
+            if ptC[0] >= 0 and ptC[0] < ros_depth.height and ptC[1] >= 0 and ptC[1] < ros_depth.width:
+                print(" --> depth = " + str(depth_frame[ptC[0], ptC[1]]))
+                X_C_Cam=(depth_frame[ptC[0], ptC[1]] * ((ptC[0])-c_x))/f_x
+                Y_C_Cam=(depth_frame[ptC[0], ptC[1]] * ((ptC[1])-c_y))/f_y
+                ptC_Cam=(X_C_Cam,Y_C_Cam, depth_frame[ptC[0], ptC[1]])
+                print("Punto C respecto a la camara:" + str(ptC_Cam))
+            print("D = (" + str(ptD[0]) + ", " + str(ptD[1]) + ")",)
+            if ptA[0] >= 0 and ptD[0] < ros_depth.height and ptD[1] >= 0 and ptD[1] < ros_depth.width:
+                print(" --> depth = " + str(depth_frame[ptD[0], ptD[1]]) )
+                X_D_Cam= (depth_frame[ptD[0], ptD[1]] * ((ptD[0])-c_x))/f_x
+                Y_D_Cam= (depth_frame[ptD[0], ptD[1]] * ((ptD[1])-c_y))/f_y
+                ptD_Cam= (X_D_Cam,Y_D_Cam, depth_frame[ptD[0], ptD[1]])
+                print("Punto D respecto a la camara:" + str(ptD_Cam))
 
+            print(Style.RESET_ALL)
+
+            PtA_Camara=np.array(ptA_Cam)
+            ptB_Camara=np.array(ptB_Cam)
+            ptC_Camara=np.array(ptC_Cam)
+            ptD_Camara=np.array(ptD_Cam)
+
+            ##Translation
+            P_cam=(PtA_Camara + ptB_Camara + ptC_Camara + ptD_Camara)/4
+            print ("Translation of tag from camera:" + str(P_cam))
+
+            ##Rotation
+            
+            X_tag_cam=(ptB_Camara- PtA_Camara)/np.dot(ptB_Camara, PtA_Camara)
+            Y_tag_cam=(ptD_Camara-PtA_Camara)/np.dot(ptD_Camara, PtA_Camara)
+            Z_tag_cam=np.cross(X_tag_cam,Y_tag_cam)
+            Rot_mat=np.c_[X_tag_cam,Y_tag_cam,Z_tag_cam,P_cam]
+            print(str(Rot_mat))
+            T_tag_cam=np.vstack([Rot_mat,[0,0,0,1]])
+            print("Posición del tag respecto a la camara:" + str(T_tag_cam))
+            print("Matrix size is:"+ str(T_tag_cam.shape))
+    
+            # print( "World coordinates from points:")
+            # print("Point A:")
+            # print("Point B:")
+            # print("Point C:")
+            # print("Point D:")
+            
             #publish the tag frame in ROS
-            # tf=publish_transform(T,"camera_color_optical_frame" , "tag_frame" + str(i), ros_rgb.header.stamp)
+            tf=self.publish_transform(T_tag_cam,"camera_color_optical_frame" , "tag_frame" + str(i), ros_rgb.header.stamp)
             i = i+1
 
             #If we want to stablize, don't use imshow and waitKey(1). Use a publisher to send the data out and use rqt_gui to see the frame.
@@ -92,6 +190,8 @@ class RealSense(object):
             cv2.imshow("rgb camera", rgb_frame)
             
             cv2.waitKey(1)
+
+            print("-------------------------------------------------------------------------------")
 
         #publish a OpenCV image to a Ros message
         imgmsg_image = CvBridge().cv2_to_imgmsg(rgb_frame, encoding="rgb8")

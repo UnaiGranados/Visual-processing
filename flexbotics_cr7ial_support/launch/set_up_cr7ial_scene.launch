@@ -60,6 +60,12 @@
       <arg name="world_name" default="$(find fanuc_cr7ial_gazebo_support)/worlds/fanuc.world"/>
       </include>
 
+      <group if="$(arg use_rs_gazebo)">
+        <!-- Load  simulated camera internal parameters -->
+        <rosparam  file="$(find visual_processing)/config/realsense_gazebo_intrinsic.yaml"/>
+        <param name="use_rs_gazebo" value="true"/>
+      </group>
+
       <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
       <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-param robot_description -urdf -model calibration_scene" />
 
@@ -79,9 +85,13 @@
           <include file="$(find realsense2_camera)/launch/rs_camera.launch">
             <arg name="align_depth" value="true"/>
             <arg name="filters" value="pointcloud"/>
+
           </include>
+
+          <!-- Load  real camera internal parameters -->
+          <rosparam  file="$(find visual_processing)/config/realsense_internal_intrinsic.yaml"/>
+          <param name="use_rs_gazebo" value="false"/>
         </group>
-      
     </group>
 
   </group>
@@ -111,7 +121,7 @@
 
 
   <!-- Load internal camera calibration intrinsics  -->
-  <include file="$(find visual_processing)/launch/visual_processing.launch"/>
+  <!-- <include file="$(find visual_processing)/launch/visual_processing.launch"/> -->
 
   <!-- camera -->
   <node pkg="tf" type="static_transform_publisher" name="arm_camera_to_flange" args="0.13 -0.079 0.118 1.224 -0.005 1.539 tool0 camera_color_optical_frame 100"/>

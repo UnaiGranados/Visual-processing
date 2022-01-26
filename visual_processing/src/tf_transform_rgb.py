@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from re import I
 from numpy.core.records import array
 import message_filters
 import cv2
@@ -10,6 +11,8 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import TransformStamped
 import numpy as np
+import yaml
+from colorama import Fore, Back, Style
 
 def publish_transform(transf, base_link, child_link, time_stamp):
     br = tf2_ros.TransformBroadcaster()
@@ -27,13 +30,29 @@ def publish_transform(transf, base_link, child_link, time_stamp):
     tf_msg.transform.rotation.z = q[3]
     br.sendTransform(tf_msg)
 
-def my_callback(img, pub):
+def my_callback(img, pub): 
+    
+  
+    if  rospy.get_param("/use_rs_gazebo")=="true":
+
+        # Read camera intrinsic calibration matrix
+        with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_gazebo_intrinsic.yaml', 'r') as file:
+            camera_parameters = yaml.load(file)
+            intrinsic_parameters = camera_parameters["camera_matrix"]["data"]
+        K=np.array(intrinsic_parameters).reshape((3,3))
+        print("Camera intrinsic parameters:"+ str(K))
+
+    else:
+        # Read camera intrinsic calibration matrix
+        with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_internal_intrinsic.yaml', 'r') as file:
+            camera_parameters = yaml.load(file)
+            intrinsic_parameters = camera_parameters["camera_matrix"]["data"]
+        K=np.array(intrinsic_parameters).reshape((3,3))
+        print("Camera intrinsic parameters:"+ str(K))
 
     #Read the  image size, encoding parameters and camera instrinsic parameters
     rospy.loginfo("New image, size = " + str(img.height) + " x " + str(img.width) + ", encoding = " + img.encoding)
-    K=np.array(rospy.get_param("/camera_matrix/data")).reshape((3,3))
-    print("Camera intrinsic parameters:"+ str(K))
-
+    
     #Detect tags in OpenCV 
     cv_image = CvBridge().imgmsg_to_cv2(img, desired_encoding="rgb8")
     gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
@@ -64,13 +83,15 @@ def my_callback(img, pub):
         cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 0), 2)
         cv2.putText(cv_image,  "ID:" + str(tagID), (ptA[0] - 30, ptA[1] - 5),
         cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 0, 255), 2)
+        
 
-        print("[INFO] tag family: {}".format(tagFamily))
+        print ("[INFO] tag family: {}".format(tagFamily))
         print("[INFO] tag ID: {}".format(tagID))
+        print(Fore.YELLOW +"Pixel coordinates:")
         print("A = (" + str(ptA[0]) + ", " + str(ptA[1]) + ")")
         print("B = (" + str(ptB[0]) + ", " + str(ptB[1]) + ")")
         print("C = (" + str(ptC[0]) + ", " + str(ptC[1]) + ")")
-        print("D = (" + str(ptD[0]) + ", " + str(ptD[1]) + ")")
+        print("D = (" + str(ptD[0]) + ", " + str(ptD[1]) + ")" + Style.RESET_ALL)
 
         # draw the bounding box of the AprilTag detection
         cv2.line(cv_image, ptA, ptB, (255, 255, 0), 2)
@@ -99,34 +120,37 @@ def my_callback(img, pub):
         object_points=np.array([A_modelo,B_modelo,C_modelo,D_modelo], dtype=np.float64)
         image_points=np.array([ptA,ptB,ptC,ptD], dtype=np.float64)
 
-        print("object_points=" + str(object_points))
-        print("image_points=" + str(image_points))
+        print(Fore.LIGHTCYAN_EX + "object_points=" + str(object_points) + Style.RESET_ALL)
+        print(Fore.YELLOW + "image_points=" + str(image_points) + Style.RESET_ALL)
 
         #transform pixel coordinates to world
         success, rvec, tvec=cv2.solvePnP(object_points,image_points,K,0)
-        print("rotation vector=" + str(rvec))
-        print("translation vector=" + str(tvec))
+        print(Fore.LIGHTMAGENTA_EX + "rotation vector=" + str(rvec))
+        print("translation vector=" + str(tvec) )
         
         # transform rotation vector 3x1 to  rotation matrix (3x3)
         rmat,_=cv2.Rodrigues(rvec)
-        print("rotation matrix=" + str(rmat))
+        print("rotation matrix=" + str(rmat) + Style.RESET_ALL)
 
         #Convertir matriz de rotacion y vector de translacion en matriz homogenea
         t=np.c_[rmat,tvec]
         T=np.vstack([t,[0,0,0,1]])
-        print("Transormation between camera and tag is:"+ str(T))
-        print("Matrix size is:"+ str(T.shape))
+        print(Fore.GREEN + "Transormation between camera and tag is:" + str(T))
+        print("Matrix size is:"+ str(T.shape) + Style.RESET_ALL)
 
         #publish the tag frame in ROS
         tf=publish_transform(T,"camera_color_optical_frame" , "tag_frame" + str(i), img.header.stamp)
         i = i+1
 
+        cv2.imshow("rgb camera",cv_image)
+
+        cv2.waitKey(1)
+
+        print("-------------------------------------------------------------------------------")
+
     #publish a OpenCV image to a Ros message
     imgmsg_image = CvBridge().cv2_to_imgmsg(cv_image, encoding="rgb8")
     pub.publish(imgmsg_image)
-
-    #publish the tag frame in ROS
-    # tf=publish_transform(T,"camera_color_optical_frame" , "tag_frame", img.header.stamp)
 
 if __name__ == '__main__':
    rospy.init_node('my_node', anonymous=True)
