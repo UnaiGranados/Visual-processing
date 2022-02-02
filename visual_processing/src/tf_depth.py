@@ -15,6 +15,7 @@ import imutils
 import matplotlib.pyplot as plt  
 import yaml
 from colorama import Fore, Back, Style
+import math
 
 class RealSense(object):
     def __init__(self):
@@ -94,8 +95,8 @@ class RealSense(object):
         for r in results:
 
             tagID = r.tag_id
-            if tagID != 0:
-                continue
+            # if tagID != 0:
+            #     continue
 
             # extract the bounding box (x, y)-coordinates for the AprilTag and convert each of the (x, y)-coordinate pairs to integers
             (ptA, ptB, ptC, ptD) = r.corners
@@ -162,18 +163,17 @@ class RealSense(object):
 
             ##Translation
             P_cam=(PtA_Camara + ptB_Camara + ptC_Camara + ptD_Camara)/4
-            print ("Translation of tag from camera:" + str(P_cam))
+            print (Fore.LIGHTCYAN_EX + "Translation of tag from camera:" + str(P_cam) )
 
             ##Rotation
-            
-            X_tag_cam=(ptB_Camara- PtA_Camara)/np.dot(ptB_Camara, PtA_Camara)
-            Y_tag_cam=(ptD_Camara-PtA_Camara)/np.dot(ptD_Camara, PtA_Camara)
+            X_tag_cam=(ptB_Camara- PtA_Camara)/np.linalg.norm(ptB_Camara - PtA_Camara)
+            Y_tag_cam=(ptD_Camara-PtA_Camara)/np.linalg.norm(ptD_Camara - PtA_Camara)
             Z_tag_cam=np.cross(X_tag_cam,Y_tag_cam)
             Rot_mat=np.c_[X_tag_cam,Y_tag_cam,Z_tag_cam,P_cam]
-            print(str(Rot_mat))
+            print("Rotation matrix:" + str(Rot_mat)+ Style.RESET_ALL)
             T_tag_cam=np.vstack([Rot_mat,[0,0,0,1]])
-            print("Posición del tag respecto a la camara:" + str(T_tag_cam))
-            print("Matrix size is:"+ str(T_tag_cam.shape))
+            print(Fore.LIGHTMAGENTA_EX + "Transormation between camera and tag is:" + str(T_tag_cam))
+            print("Matrix size is:"+ str(T_tag_cam.shape) + Style.RESET_ALL)
     
             # print( "World coordinates from points:")
             # print("Point A:")

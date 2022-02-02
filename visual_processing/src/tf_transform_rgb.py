@@ -66,8 +66,8 @@ def my_callback(img, pub):
     for r in results:
 
         tagID = r.tag_id
-        if tagID != 0:
-            continue
+        # if tagID != 0:
+        #     continue
 
         # extract the bounding box (x, y)-coordinates for the AprilTag and convert each of the (x, y)-coordinate pairs to integers
         (ptA, ptB, ptC, ptD) = r.corners
@@ -141,7 +141,7 @@ def my_callback(img, pub):
         #publish the tag frame in ROS
         tf=publish_transform(T,"camera_color_optical_frame" , "tag_frame" + str(i), img.header.stamp)
         i = i+1
-
+        
         cv2.imshow("rgb camera",cv_image)
 
         cv2.waitKey(1)

@@ -10,6 +10,8 @@
   <arg name="launch_rviz" default="true" />
   <arg name="rviz_config" default="$(find flexbotics_cr7ial_support)/launch/cr7ial_scene.rviz" />
   <arg name="use_rs_gazebo" default="true" />
+  <arg name="rgb_method" default="true" />
+
 
   <arg name="robot_name" value="calibration_scene"/>
   <arg name="robot_description" default="robot_description"/>
@@ -103,7 +105,24 @@
       <arg name="robot_ip" value="$(arg robot_ip)"/>
       <arg name="use_bswap"  value="$(arg use_bswap)" />
     </include>
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <arg name="align_depth" value="true"/>
+      <arg name="filters" value="pointcloud"/>
+    </include>
+    <!-- Load  real camera internal parameters -->
+    <rosparam  file="$(find visual_processing)/config/realsense_internal_intrinsic.yaml"/>
+    <param name="use_rs_gazebo" value="false"/>
   </group>
+
+  <!-- Python node to detect tag and publish the transformation -->
+  <!-- <group if="$(arg rgb_method)">
+    <node pkg="visual_processing" type="tf_transform_rgb.py" name="rgb" />
+  </group>
+
+  <group unless="$(arg rgb_method)">
+    <node pkg="visual_processing" type="tf_depth.py" name="depth" />
+  </group>
+ -->
 
   <!-- Manipulator Controller -->
   <group ns="$(arg robot_name)" if="$(arg use_mc)">
@@ -119,10 +138,6 @@
     <node name="$(anon rviz)" pkg="rviz" type="rviz" respawn="false" args="$(arg command_args)" output="screen" />
   </group>
 
-
-  <!-- Load internal camera calibration intrinsics  -->
-  <!-- <include file="$(find visual_processing)/launch/visual_processing.launch"/> -->
-
   <!-- camera -->
   <node pkg="tf" type="static_transform_publisher" name="arm_camera_to_flange" args="0.13 -0.079 0.118 1.224 -0.005 1.539 tool0 camera_color_optical_frame 100"/>
   <!-- <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/> -->
@@ -130,9 +145,6 @@
   <!-- Move group -->
   <node name="moveit_move_group" pkg="visual_processing" type="moveit_move_group.py" respawn="false" output="screen">
   </node> 
-
-  <!-- arguments for the RealSense urdf xacro file, rviz visualization and namespace -->
-  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find realsense2_description)/rviz/urdf.rviz" required="true" /> -->
     
 </launch>
 

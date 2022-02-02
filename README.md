@@ -1,6 +1,6 @@
-# Vision based robot control (Visual servoing)  in ROS
+# 3D vision system for tag detection and dynamic control of robotic arm in ROS
 
-This ROS metapackage contains specific robot setup configuration files and visual servoing files.
+This ROS metapackage contains specific robot setup configuration files, tag detections files and robot control files.
 
 ## 1. Dependencies
 
@@ -13,10 +13,15 @@ Tecnalia repositories:
 Additional dependencies:
 
 * `fanuc`
+* `fanuc_gazebo`
 * `industrial_robot_simulator`
 * `robot_state_publisher`
 * `rviz`
+* `rviz_visual_tools`
 * `realsense-ros`
+* `realsense_gazebo_plugin`
+* `moveit_calibration`
+* `moveit_visual_tools`
 
 ## 2. Installation
 
@@ -47,8 +52,7 @@ $ cd <ws_folder>
 <ws_folder>/src $ wstool merge <package_folder>/.rosinstall
 ```
 
-### 2.5. Clone repositories defined in the `.rosinstall` file                                                                                                                                                                                                                                                                                                                    
-
+### 2.5. Clone repositories defined in the `.rosinstall` file                                                                                                                                                                                                                              
 ```shell
 <ws_folder>/src $ wstool update -t .
 ```
@@ -69,21 +73,18 @@ Before running `rosdep install` make sure lists are updated with `sudo apt updat
 
 ## 3. Structure
 
-This is a set of packages to perform a visual servoing. The current implementation includes the following three main packages:
+This is a set of packages to perform  visual servoing functionalities. The current implementation includes the following three main packages:
 
 * `flexbotics_cr7ial_support`: configuration, scene URDF and launch files for the FANUC CR-7iA/L robot.
 * `flexbotics_cr7ial_moveit_config`: *MoveIt! Setup Assistant* generated package.
+* `visual_processing`: this is where the nodes and other packages that perform the actual work are implemented.
 
-There are another  packcage that  contain nodes for visual servoing:
-
-* `laser_calibration_sandbox`: some dummy tests with the laser and `the manipulator_commander` package.
-* `laser_scan`: a simple node that exposes two services `/laser_scan_node/start_capturing` and `/laser_scan_node/stop_capturing` to capture laser readings and robot poses. The node starts capturing data when the `start_capturing` service is called and stops capturing and publishes a point cloud of the captured data on the `/laser_scan_node/pointcloud` topic when the `stop_capturing` service is called.
 
 ## 4. Usage
 
 ### 4.1. Robot setup test scenario
 
-The scene with the FANUC CR-7iA/L robot can be launched as follows:
+The scene with the FANUC CR-7iA/L robot can be launched in as follows:
 
 ```shell
 $ roslaunch flexbotics_cr7ial_support set_up_cr7ial_scene.launch
@@ -95,9 +96,15 @@ By default, the scene will be launched with a simulated robot making use of the 
 $ roslaunch flexbotics_cr7ial_support set_up_cr7ial_scene.launch use_sim:=false
 ```
 
+By default simulation will be visualized on Gazebo with a simulated RealSense D435 camera. To launch scene with the real camera set `use_gazebo` and `use_rs_gazebo` arguments to `false`:
+
+```shell
+$ roslaunch flexbotics_cr7ial_support set_up_cr7ial_scene.launch use_gazebo:=false use_rs_gazebo:=false
+```
+
 For instructions about how to use the real robot see the [tecnalia_robotics/fanuc/Documentation](https://git.code.tecnalia.com/tecnalia_robotics/fanuc/documentation) repository.
 
-### 4.2. Camera calibrator 
+### 4.2. Camera calibration
 
 There is a package that has been implemented to calibrate the RealSense D435 depth camera, see the [tecnalia_robotics/flexbotics_calibration_suite](https://git.code.tecnalia.com/tecnalia_robotics/flexbotics_calibration_suite) repository.
 
@@ -108,21 +115,22 @@ $ roslaunch flexbotics_calibration_suite flexbotics_calibration_suite.launch
 ```
 With this launch, a GUI will open.Then choose the type of calibration needed and start the the calibration procedure. [manipulator_commander] is needed for the calibration.
 
-### 4.3. Visual servoing
+### 4.3. Tag detection
 
-The approach implemented here is based on making a series of captures of a plane with a laser scanner from different robot flange positions. In this scenario, the laser scanner will capture straight lines. If the lines are expressed in the coordinate system of the robot base and the calibration is correct, these lines should converge onto a plane.
+The approach implemented here is based on different python nodes to detect a marker/tag and compute the transform between camera and tag using OpenCV. To get this result, has been implemented two methods:
 
-This package implements the data acquisition part of the algorithm. Robot movements are performed with the laser scanner facing a plane. The robot will loop over different poses and at each location will wait for 1 second before recording the robot pose and laser reading. All the data is then saved into a CSV file that can be fed to the Python program implemented in the [laser_calibration](https://git.code.tecnalia.com/tecnalia_robotics/avanwinglet/laser_calibration) repository where the actual calibration is performed.
-
-To launch the data acquisition execute the following command:
+The firts one is using RGB image and tag model dimension to calculate the rotation and translation of the tag respect to the camera:
 
 ```shell
-$ roslaunch laser_calibration calib_acquisition.launch simulate_devices:=false
+$ python tf_transform_rgb.py
+```
+The other one is using both RGB and depth image:
+
+```shell
+$ python tf_depth.py
 ```
 
-The robot will loop over 81 different poses assuming that the robot is mounted on top of a table as in the Tecnalia's Flexible Robotics lab. These position and rotations are set by default by the `calib_validation_node`. Check the input arguments to this node to change this behaviour.
-
-### 4.4.  
+### 4.4. Move robot 
 
 The idea behind the calibration validation is to scan an element with a known geometry and check the accuracy of the reconstructed pointcloud from the laser readings. The program that allows capturing the data is implemented in the `laser_calibration/src/calib_validation_node.cpp` node. Data is generated by performing a linear movement with the robot and storing robot poses and laser readings in separate CSV files.
 

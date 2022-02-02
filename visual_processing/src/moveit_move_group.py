@@ -9,17 +9,12 @@ import geometry_msgs.msg
 from math import pi
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
-## END_SUB_TUTORIAL
+import tf2_ros
+
 
 
 def all_close(goal, actual, tolerance):
-  """
-  Convenience method for testing if a list of values are within a tolerance of their counterparts in another list
-  @param: goal       A list of floats, a Pose or a PoseStamped
-  @param: actual     A list of floats, a Pose or a PoseStamped
-  @param: tolerance  A float
-  @returns: bool
-  """
+  
   all_equal = True
   if type(goal) is list:
     for index in range(len(goal)):
@@ -36,7 +31,7 @@ def all_close(goal, actual, tolerance):
 
 
 class MoveGroupPythonIntefaceTutorial(object):
-  """MoveGroupPythonIntefaceTutorial"""
+  
   def __init__(self):
     super(MoveGroupPythonIntefaceTutorial, self).__init__()
 
@@ -186,6 +181,14 @@ def main():
     # raw_input()
     tutorial.go_to_joint_state()
 
+    now = rospy.get_rostime()
+    rospy.loginfo("Current time %i %i", now.secs, now.nsecs)
+
+    # # rospy.sleep(30)
+    # rospy.Duration(2)
+    
+    # rospy.Timer(period, callback, oneshot=False)
+
     # print ("============ Press `Enter` to execute a movement using a pose goal ...")
     # raw_input()
     # tutorial.go_to_pose_goal()
@@ -199,4 +202,18 @@ def main():
 
 if __name__ == '__main__':
   main()
+  # tf listener
+  # rospy.init_node('tf_listener')
+  # tfBuffer = tf2_ros.Buffer()
+  # listener = tf2_ros.TransformListener(tfBuffer)
+  # rate = rospy.Rate(10.0)
+  # while not rospy.is_shutdown():
+  #     try:
+  #            trans = tfBuffer.lookup_transform('base_link', 'tag_frame', rospy.Time(0))
+  #     except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+  #             rate.sleep()
+  #             continue
+            
+  # print(trans)
+
 
