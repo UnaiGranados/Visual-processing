@@ -50,7 +50,7 @@ class RealSense(object):
         
         if  rospy.get_param("/use_rs_gazebo")=="true":
 
-            # Read camera intrinsic calibration matrix
+            # Read  gazebo camera intrinsic calibration matrix
             with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_gazebo_intrinsic.yaml', 'r') as file:
                 camera_parameters = yaml.load(file)
                 intrinsic_parameters = camera_parameters["camera_matrix"]["data"]
@@ -58,7 +58,7 @@ class RealSense(object):
             print("Camera intrinsic parameters:"+ str(K))
 
         else:
-            # Read camera intrinsic calibration matrix
+            # Read real camera intrinsic calibration matrix
             with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_internal_intrinsic.yaml', 'r') as file:
                 camera_parameters = yaml.load(file)
                 intrinsic_parameters = camera_parameters["camera_matrix"]["data"]
@@ -79,8 +79,8 @@ class RealSense(object):
         rgb_frame = self.br.imgmsg_to_cv2(ros_rgb, desired_encoding="rgb8")
         
         # #resize image
-        depth_frame = imutils.resize(depth_frame,height=480,  width=640)
-        rgb_frame = imutils.resize(rgb_frame, height=480, width=640)
+        depth_frame = imutils.resize(depth_frame, width=640, height=480)
+        rgb_frame = imutils.resize(rgb_frame, width=640, height=480)
         
         depth_frame_gray = cv2.cvtColor(depth_frame, cv2.COLOR_GRAY2BGR)
         rgb_gray =cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2GRAY)
@@ -95,8 +95,8 @@ class RealSense(object):
         for r in results:
 
             tagID = r.tag_id
-            # if tagID != 0:
-            #     continue
+            if tagID != 0:
+                continue
 
             # extract the bounding box (x, y)-coordinates for the AprilTag and convert each of the (x, y)-coordinate pairs to integers
             (ptA, ptB, ptC, ptD) = r.corners
@@ -126,68 +126,75 @@ class RealSense(object):
 
             print("[INFO] tag family: {}".format(tagFamily))
             print(Fore.YELLOW + "A = (" + str(ptA[0]) + ", " + str(ptA[1])+ ")")
-            if ptA[0] >= 0 and ptA[0] < ros_depth.height and ptA[1] >= 0 and ptA[1] < ros_depth.width:
-                print(" --> depth = " + str(depth_frame[ptA[0], ptA[1]]))
-                X_A_Cam= (depth_frame[ptA[0], ptA[1]] * ((ptA[0])-c_x))/f_x
-                Y_A_Cam= (depth_frame[ptA[0], ptA[1]] * ((ptA[1])-c_y))/f_y
-                ptA_Cam=(X_A_Cam,Y_A_Cam, depth_frame[ptA[0], ptA[1]])
-                print("Punto A respecto a la camara:" + str(ptA_Cam))
-            print("B = (" + str(ptB[0]) + ", " + str(ptB[1]) + ")",)
-            if ptB[0] >= 0 and ptB[0] < ros_depth.height and ptB[1] >= 0 and ptB[1] < ros_depth.width:
-                print(" --> depth = " + str(depth_frame[ptB[0], ptB[1]]))
-                X_B_Cam= (depth_frame[ptB[0], ptB[1]] * ((ptB[0])-c_x))/f_x
-                Y_B_Cam= (depth_frame[ptB[0], ptB[1]] * ((ptB[1])-c_y))/f_y
-                ptB_Cam=(X_B_Cam,Y_B_Cam, depth_frame[ptB[0], ptB[1]])
-                print("Punto B respecto a la camara:" + str(ptB_Cam))
-            print("C = (" + str(ptC[0]) + ", " + str(ptC[1]) + ")",)
-            if ptC[0] >= 0 and ptC[0] < ros_depth.height and ptC[1] >= 0 and ptC[1] < ros_depth.width:
-                print(" --> depth = " + str(depth_frame[ptC[0], ptC[1]]))
-                X_C_Cam=(depth_frame[ptC[0], ptC[1]] * ((ptC[0])-c_x))/f_x
-                Y_C_Cam=(depth_frame[ptC[0], ptC[1]] * ((ptC[1])-c_y))/f_y
-                ptC_Cam=(X_C_Cam,Y_C_Cam, depth_frame[ptC[0], ptC[1]])
-                print("Punto C respecto a la camara:" + str(ptC_Cam))
-            print("D = (" + str(ptD[0]) + ", " + str(ptD[1]) + ")",)
-            if ptA[0] >= 0 and ptD[0] < ros_depth.height and ptD[1] >= 0 and ptD[1] < ros_depth.width:
-                print(" --> depth = " + str(depth_frame[ptD[0], ptD[1]]) )
-                X_D_Cam= (depth_frame[ptD[0], ptD[1]] * ((ptD[0])-c_x))/f_x
-                Y_D_Cam= (depth_frame[ptD[0], ptD[1]] * ((ptD[1])-c_y))/f_y
-                ptD_Cam= (X_D_Cam,Y_D_Cam, depth_frame[ptD[0], ptD[1]])
-                print("Punto D respecto a la camara:" + str(ptD_Cam))
-
-            print(Style.RESET_ALL)
-
-            PtA_Camara=np.array(ptA_Cam)
-            ptB_Camara=np.array(ptB_Cam)
-            ptC_Camara=np.array(ptC_Cam)
-            ptD_Camara=np.array(ptD_Cam)
-
-            ##Translation
-            P_cam=(PtA_Camara + ptB_Camara + ptC_Camara + ptD_Camara)/4
-            print (Fore.LIGHTCYAN_EX + "Translation of tag from camera:" + str(P_cam) )
-
-            ##Rotation
-            X_tag_cam=(ptB_Camara- PtA_Camara)/np.linalg.norm(ptB_Camara - PtA_Camara)
-            Y_tag_cam=(ptD_Camara-PtA_Camara)/np.linalg.norm(ptD_Camara - PtA_Camara)
-            Z_tag_cam=np.cross(X_tag_cam,Y_tag_cam)
-            Rot_mat=np.c_[X_tag_cam,Y_tag_cam,Z_tag_cam,P_cam]
-            print("Rotation matrix:" + str(Rot_mat)+ Style.RESET_ALL)
-            T_tag_cam=np.vstack([Rot_mat,[0,0,0,1]])
-            print(Fore.LIGHTMAGENTA_EX + "Transormation between camera and tag is:" + str(T_tag_cam))
-            print("Matrix size is:"+ str(T_tag_cam.shape) + Style.RESET_ALL)
-    
-            # print( "World coordinates from points:")
-            # print("Point A:")
-            # print("Point B:")
-            # print("Point C:")
-            # print("Point D:")
+            T_tag_cam = np.eye(4)
             
-            #publish the tag frame in ROS
+            if ptA[0] >= 0 and ptA[0] < ros_depth.height and ptA[1] >= 0 and ptA[1] < ros_depth.width and ptB[0] >= 0 and ptB[0] < ros_depth.height and ptB[1] >= 0 and ptB[1] < ros_depth.width and ptC[0] >= 0 and ptC[0] < ros_depth.height and ptC[1] >= 0 and ptC[1] < ros_depth.width and ptD[0] >= 0 and ptD[0] < ros_depth.height and ptD[1] >= 0 and ptD[1] < ros_depth.width:
+
+                if depth_frame[ptA[1], ptA[0]] != 0 and depth_frame[ptB[1], ptB[0]] != 0 and depth_frame[ptC[1], ptC[0]] != 0 and depth_frame[ptD[1], ptD[0]] != 0:
+                   
+                    print(" --> depth = " + str(depth_frame[ptA[1], ptA[0]]))
+                    X_A_Cam= (depth_frame[ptA[1], ptA[0]] * ((ptA[0])-c_x))/f_x
+                    Y_A_Cam= (depth_frame[ptA[1], ptA[0]] * ((ptA[1])-c_y))/f_y
+                    ptA_Cam=(X_A_Cam,Y_A_Cam, depth_frame[ptA[1], ptA[0]])
+                    print("Punto A respecto a la camara:" + str(ptA_Cam))
+
+                    print("B = (" + str(ptB[0]) + ", " + str(ptB[1]) + ")")
+                    print(" --> depth = " + str(depth_frame[ptB[1], ptB[0]]))
+                    X_B_Cam= (depth_frame[ptB[1], ptB[0]] * ((ptB[0])-c_x))/f_x
+                    Y_B_Cam= (depth_frame[ptB[1], ptB[0]] * ((ptB[1])-c_y))/f_y
+                    ptB_Cam=(X_B_Cam,Y_B_Cam, depth_frame[ptB[1], ptB[0]])
+                    print("Punto B respecto a la camara:" + str(ptB_Cam))
+
+                    print("C = (" + str(ptC[0]) + ", " + str(ptC[1]) + ")")
+                    print(" --> depth = " + str(depth_frame[ptC[1], ptC[0]]))
+                    X_C_Cam=(depth_frame[ptC[1], ptC[0]] * ((ptC[0])-c_x))/f_x
+                    Y_C_Cam=(depth_frame[ptC[1], ptC[0]] * ((ptC[1])-c_y))/f_y
+                    ptC_Cam=(X_C_Cam,Y_C_Cam, depth_frame[ptC[1], ptC[0]])
+                    print("Punto C respecto a la camara:" + str(ptC_Cam))
+
+                    print("D = (" + str(ptD[0]) + ", " + str(ptD[1]) + ")")
+                    print(" --> depth = " + str(depth_frame[ptD[1], ptD[0]]) )
+                    X_D_Cam= (depth_frame[ptD[1], ptD[0]] * ((ptD[0])-c_x))/f_x
+                    Y_D_Cam= (depth_frame[ptD[1], ptD[0]] * ((ptD[1])-c_y))/f_y
+                    ptD_Cam= (X_D_Cam,Y_D_Cam, depth_frame[ptD[1], ptD[0]])
+                    print("Punto D respecto a la camara:" + str(ptD_Cam))
+
+                    print(Style.RESET_ALL)
+
+                    PtA_Camara=np.array(ptA_Cam)
+                    ptB_Camara=np.array(ptB_Cam)
+                    ptC_Camara=np.array(ptC_Cam)
+                    ptD_Camara=np.array(ptD_Cam)
+
+                    ##Translation
+                    P_cam=(PtA_Camara + ptB_Camara + ptC_Camara + ptD_Camara)/(4*1000) #mm to meter
+                    print (Fore.LIGHTCYAN_EX + "Translation of tag from camera:" + str(P_cam) )
+
+                    ##Rotation
+                    X_tag_cam=(ptB_Camara- PtA_Camara)/np.linalg.norm(ptB_Camara - PtA_Camara)
+                    Y_tag_cam=(ptD_Camara-PtA_Camara)/np.linalg.norm(ptD_Camara - PtA_Camara)
+                    Z_tag_cam=np.cross(X_tag_cam,Y_tag_cam)/np.linalg.norm(np.cross(X_tag_cam,Y_tag_cam))
+                    Y_tag_cam=np.cross(Z_tag_cam, X_tag_cam)
+                    Mat=np.c_[X_tag_cam,Y_tag_cam,Z_tag_cam,P_cam]
+                    print("Rotation matrix:" + str(Mat)+ Style.RESET_ALL)
+                    
+                    #Transformation
+                    T_tag_cam=np.vstack([Mat,[0,0,0,1]])
+                    print(Fore.LIGHTMAGENTA_EX + "Transormation between camera and tag is:" + str(T_tag_cam))
+                    print("Matrix size is:"+ str(T_tag_cam.shape) + Style.RESET_ALL)
+                    print("T * T^transp:"+ str(np.dot(T_tag_cam[:3, :3], T_tag_cam[:3, :3].T)) + Style.RESET_ALL)
+                    print("norm x = " + str(np.linalg.norm(X_tag_cam)))
+                    print("norm y = " + str(np.linalg.norm(Y_tag_cam)))
+                    print("norm z = " + str(np.linalg.norm(Z_tag_cam)))
+
+
+            #publish tag frame in ROS
             tf=self.publish_transform(T_tag_cam,"camera_color_optical_frame" , "tag_frame" + str(i), ros_rgb.header.stamp)
             i = i+1
 
             #If we want to stablize, don't use imshow and waitKey(1). Use a publisher to send the data out and use rqt_gui to see the frame.
-            cv2.imshow("depth camera", depth_frame)
-            cv2.imshow("rgb camera", rgb_frame)
+            # cv2.imshow("depth camera", depth_frame)
+            # cv2.imshow("rgb camera", rgb_frame)
             
             cv2.waitKey(1)
 

@@ -10,6 +10,8 @@ from math import pi
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 import tf2_ros
+from tf import TransformListener
+import tf
 
 
 
@@ -201,9 +203,30 @@ def main():
     return
 
 if __name__ == '__main__':
+  
   main()
-  # tf listener
-  # rospy.init_node('tf_listener')
+
+  listener = tf.TransformListener()
+  rate = rospy.Rate(10.0)
+
+  while not rospy.is_shutdown():
+  
+         try:
+               (trans,rot) = listener.lookupTransform('/base_link', '/tag_frame', rospy.Time(0))
+         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+               continue
+   
+  print()
+  
+  rate.sleep()
+  
+
+  # tf = TransformListener()
+  # if tf.frameExists("base_link") and tf.frameExists("tag_frame"):
+  #   t = tf.getLatestCommonTime("base_link", "tag_frame")
+  #   position, quaternion = tf.lookupTransform("base_link", "tag_frame", t)
+  #   print (position, quaternion)
+
   # tfBuffer = tf2_ros.Buffer()
   # listener = tf2_ros.TransformListener(tfBuffer)
   # rate = rospy.Rate(10.0)

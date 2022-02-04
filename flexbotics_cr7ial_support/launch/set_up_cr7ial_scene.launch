@@ -80,6 +80,7 @@
     </group>
 
     <group unless="$(arg use_gazebo)">
+      
       <include file="$(find industrial_robot_simulator)/launch/robot_interface_simulator.launch"/>
       
         <!-- RealSense camera  -->
@@ -87,7 +88,7 @@
           <include file="$(find realsense2_camera)/launch/rs_camera.launch">
             <arg name="align_depth" value="true"/>
             <arg name="filters" value="pointcloud"/>
-
+            <param name="use_rs_gazebo" value="false"/>
           </include>
 
           <!-- Load  real camera internal parameters -->

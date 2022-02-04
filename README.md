@@ -1,6 +1,6 @@
 # 3D vision system for tag detection and dynamic control of robotic arm in ROS
 
-This ROS metapackage contains specific robot setup configuration files, tag detections files and robot control files.
+This ROS metapackage contains specific robot setup configuration, tag detections  and robot control files.
 
 ## 1. Dependencies
 

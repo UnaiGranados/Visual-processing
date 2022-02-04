@@ -33,7 +33,7 @@ def publish_transform(transf, base_link, child_link, time_stamp):
 def my_callback(img, pub): 
     
   
-    if  rospy.get_param("/use_rs_gazebo")=="true":
+    if  rospy.get_param("use_rs_gazebo")=="true":
 
         # Read camera intrinsic calibration matrix
         with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_gazebo_intrinsic.yaml', 'r') as file:
@@ -142,9 +142,9 @@ def my_callback(img, pub):
         tf=publish_transform(T,"camera_color_optical_frame" , "tag_frame" + str(i), img.header.stamp)
         i = i+1
         
-        cv2.imshow("rgb camera",cv_image)
+        # cv2.imshow("rgb camera",cv_image)
 
-        cv2.waitKey(1)
+        # cv2.waitKey(1)
 
         print("-------------------------------------------------------------------------------")
 
