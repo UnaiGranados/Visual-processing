@@ -13,6 +13,8 @@ from geometry_msgs.msg import TransformStamped
 import numpy as np
 import yaml
 from colorama import Fore, Back, Style
+import tf
+
 
 def publish_transform(transf, base_link, child_link, time_stamp):
     br = tf2_ros.TransformBroadcaster()
@@ -30,12 +32,21 @@ def publish_transform(transf, base_link, child_link, time_stamp):
     tf_msg.transform.rotation.z = q[3]
     br.sendTransform(tf_msg)
 
-def my_callback(img, pub): 
-    
-  
-    if  rospy.get_param("use_rs_gazebo")=="true":
+# def tag_results_callback(tags):
+#     print("Returning" + str(tags))
+#     return tags
 
-        # Read camera intrinsic calibration matrix
+# def tag_results(number_tags):
+#     rospy.init_node("Tag_results_node")
+#     s=rospy.service("Tag_results",number_tags, tag_results_callback)
+
+
+
+def my_callback(img, pub): 
+  
+    if  rospy.get_param("use_rs_gazebo"):
+
+        # Read  virtual camera intrinsic calibration matrix
         with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_gazebo_intrinsic.yaml', 'r') as file:
             camera_parameters = yaml.load(file)
             intrinsic_parameters = camera_parameters["camera_matrix"]["data"]
@@ -43,7 +54,8 @@ def my_callback(img, pub):
         print("Camera intrinsic parameters:"+ str(K))
 
     else:
-        # Read camera intrinsic calibration matrix
+       
+        # Read real camera intrinsic calibration matrix
         with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_internal_intrinsic.yaml', 'r') as file:
             camera_parameters = yaml.load(file)
             intrinsic_parameters = camera_parameters["camera_matrix"]["data"]
@@ -60,14 +72,16 @@ def my_callback(img, pub):
     detector = apriltag.Detector(options)
     results = detector.detect(gray)
 
+    # N=tag_results(results)
+
     # loop over the AprilTag detection results
     T = np.eye(4)
     i = 1
     for r in results:
 
         tagID = r.tag_id
-        # if tagID != 0:
-        #     continue
+        if tagID != 0:
+            continue
 
         # extract the bounding box (x, y)-coordinates for the AprilTag and convert each of the (x, y)-coordinate pairs to integers
         (ptA, ptB, ptC, ptD) = r.corners
@@ -141,6 +155,8 @@ def my_callback(img, pub):
         #publish the tag frame in ROS
         tf=publish_transform(T,"camera_color_optical_frame" , "tag_frame" + str(i), img.header.stamp)
         i = i+1
+        
+
         
         # cv2.imshow("rgb camera",cv_image)
 

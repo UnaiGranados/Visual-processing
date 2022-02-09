@@ -22,8 +22,8 @@ class RealSense(object):
       
         #use CvBridge to convert between ROS and OpenCV images
         self.br = CvBridge()
-
-        # Node is subscribing to the rgb/image_raw topic
+        
+        # Node is subscribing to the camera/color/image_raw topic
         self.rgb_sub = message_filters.Subscriber('camera/color/image_raw', Image)
 
         # Node is subscribing to the /depth_to_rgb/image_raw topic
@@ -48,7 +48,7 @@ class RealSense(object):
     def callback(self, ros_rgb, ros_depth):
 
         
-        if  rospy.get_param("/use_rs_gazebo")=="true":
+        if  rospy.get_param("use_rs_gazebo"):
 
             # Read  gazebo camera intrinsic calibration matrix
             with open('/home/tecnalia/workspace/fanuc_3D_cam_ws/src/visual_servoing/visual_processing/config/realsense_gazebo_intrinsic.yaml', 'r') as file:
@@ -173,7 +173,7 @@ class RealSense(object):
                     ##Rotation
                     X_tag_cam=(ptB_Camara- PtA_Camara)/np.linalg.norm(ptB_Camara - PtA_Camara)
                     Y_tag_cam=(ptD_Camara-PtA_Camara)/np.linalg.norm(ptD_Camara - PtA_Camara)
-                    Z_tag_cam=np.cross(X_tag_cam,Y_tag_cam)/np.linalg.norm(np.cross(X_tag_cam,Y_tag_cam))
+                    Z_tag_cam=np.cross(Y_tag_cam,X_tag_cam)/np.linalg.norm(np.cross(X_tag_cam,Y_tag_cam))
                     Y_tag_cam=np.cross(Z_tag_cam, X_tag_cam)
                     Mat=np.c_[X_tag_cam,Y_tag_cam,Z_tag_cam,P_cam]
                     print("Rotation matrix:" + str(Mat)+ Style.RESET_ALL)
@@ -196,7 +196,7 @@ class RealSense(object):
             # cv2.imshow("depth camera", depth_frame)
             # cv2.imshow("rgb camera", rgb_frame)
             
-            cv2.waitKey(1)
+            # cv2.waitKey(1)
 
             print("-------------------------------------------------------------------------------")
 
@@ -207,12 +207,7 @@ class RealSense(object):
 def main():
 
     my_node = RealSense()
-    # Tells rospy the name of the node.
-    # Anonymous = True makes sure the node has a unique name. Random
-    # numbers are added to the end of the name. 
     rospy.init_node("tf_transform_rgb_depth", anonymous=True)
-
-
     ts = message_filters.ApproximateTimeSynchronizer([my_node.rgb_sub, my_node.depth_sub], 10, 0.1)
     ts.registerCallback(my_node.callback)
     # spin() simply keeps python from exiting until this node is stopped

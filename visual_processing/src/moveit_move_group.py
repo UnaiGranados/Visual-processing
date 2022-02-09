@@ -10,10 +10,12 @@ from math import pi
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 import tf2_ros
-from tf import TransformListener
+from tf2_ros import TransformListener
+from tf2_ros import Buffer
 import tf
-
-
+from rospy import Time
+# from tf_transform_rgb import results
+# from tf_depth import results
 
 def all_close(goal, actual, tolerance):
   
@@ -51,11 +53,8 @@ class MoveGroupPythonIntefaceTutorial(object):
     ## for getting, setting, and updating the robot's internal understanding of the
     ## surrounding world:
     scene = moveit_commander.PlanningSceneInterface()
-
     ## Instantiate a `MoveGroupCommander`_ object.  This object is an interface
-    ## to a planning group (group of joints).  In this tutorial the group is the primary
-    ## arm joints in the Panda robot, so we set the group's name to "panda_arm".
-    ## If you are using a different robot, change this value to the name of your robot
+    ## to a planning group (group of joints).  In this tutorial the group iresultsme of your robot
     ## arm planning group.
     ## This interface can be used to plan and execute motions:
     group_name = "manipulator"
@@ -176,6 +175,7 @@ class MoveGroupPythonIntefaceTutorial(object):
 
 
 def main():
+
   try:
     tutorial = MoveGroupPythonIntefaceTutorial()
 
@@ -183,60 +183,48 @@ def main():
     # raw_input()
     tutorial.go_to_joint_state()
 
-    now = rospy.get_rostime()
-    rospy.loginfo("Current time %i %i", now.secs, now.nsecs)
-
-    # # rospy.sleep(30)
-    # rospy.Duration(2)
-    
-    # rospy.Timer(period, callback, oneshot=False)
-
     # print ("============ Press `Enter` to execute a movement using a pose goal ...")
     # raw_input()
     # tutorial.go_to_pose_goal()
 
-    print ("============ Move group completed!")
-    
+    print ("============ Move group completed!=============")
+  
+   
   except rospy.ROSInterruptException:
     return
   except KeyboardInterrupt:
     return
 
+def timer_callback(event):
+  print ('Timer called at ' + str(event.current_real))
+  # rospy.init_node('tf_listener')
+  tfBuffer = tf2_ros.Buffer()
+  listener = tf2_ros.TransformListener(tfBuffer)
+  i=1
+
+  # rospy.wait_for_service("Tag_results")
+  # N_tags=rospy.ServiceProxy("Tag_results", number_tags)
+  # print("Tag results:" + str(N_tags))
+  
+  # for r in N_tags:
+  try:   
+    # (trans,rot) = listener.lookupTransform("/base_link", "/tag_frame" + str(i), rospy.Time(0))
+    # trans = tfBuffer.lookup_transform("base_link", "tag_frame1" , rospy.Time(0))   
+    trans = tfBuffer.lookup_transform("base_link", "tag_frame" + str(i), rospy.Time.now(), rospy.Duration(2))   
+    print(trans) 
+  except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+    print("Transform not available")
+
+    # i=i+1
+    
 if __name__ == '__main__':
-  
   main()
-
-  listener = tf.TransformListener()
-  rate = rospy.Rate(10.0)
-
-  while not rospy.is_shutdown():
-  
-         try:
-               (trans,rot) = listener.lookupTransform('/base_link', '/tag_frame', rospy.Time(0))
-         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-               continue
-   
-  print()
-  
-  rate.sleep()
   
 
-  # tf = TransformListener()
-  # if tf.frameExists("base_link") and tf.frameExists("tag_frame"):
-  #   t = tf.getLatestCommonTime("base_link", "tag_frame")
-  #   position, quaternion = tf.lookupTransform("base_link", "tag_frame", t)
-  #   print (position, quaternion)
+  rospy.Timer(rospy.Duration(3), timer_callback)
+  
+  rospy.spin()
+ 
 
-  # tfBuffer = tf2_ros.Buffer()
-  # listener = tf2_ros.TransformListener(tfBuffer)
-  # rate = rospy.Rate(10.0)
-  # while not rospy.is_shutdown():
-  #     try:
-  #            trans = tfBuffer.lookup_transform('base_link', 'tag_frame', rospy.Time(0))
-  #     except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-  #             rate.sleep()
-  #             continue
-            
-  # print(trans)
 
 

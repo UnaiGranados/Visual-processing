@@ -6,6 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /TF1
+        - /TF1/Frames1
       Splitter Ratio: 0.5
     Tree Height: 728
   - Class: rviz/Selection
@@ -182,6 +184,125 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        base:
+          Value: true
+        base_link:
+          Value: true
+        camera_aligned_depth_to_color_frame:
+          Value: true
+        camera_bottom_screw_frame:
+          Value: true
+        camera_color_frame:
+          Value: true
+        camera_color_optical_frame:
+          Value: true
+        camera_depth_frame:
+          Value: true
+        camera_depth_optical_frame:
+          Value: true
+        camera_infra1_frame:
+          Value: true
+        camera_infra1_optical_frame:
+          Value: true
+        camera_infra2_frame:
+          Value: true
+        camera_infra2_optical_frame:
+          Value: true
+        camera_left_ir_frame:
+          Value: true
+        camera_left_ir_optical_frame:
+          Value: true
+        camera_link:
+          Value: true
+        camera_right_ir_frame:
+          Value: true
+        camera_right_ir_optical_frame:
+          Value: true
+        eff_frame:
+          Value: true
+        flange:
+          Value: true
+        laser_origin:
+          Value: true
+        link_1:
+          Value: true
+        link_2:
+          Value: true
+        link_3:
+          Value: true
+        link_4:
+          Value: true
+        link_5:
+          Value: true
+        link_6:
+          Value: true
+        quelltech_sensor_optical_frame:
+          Value: true
+        sensors_assembly:
+          Value: true
+        table:
+          Value: true
+        tool0:
+          Value: true
+        world:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          base_link:
+            base:
+              {}
+            link_1:
+              link_2:
+                link_3:
+                  link_4:
+                    link_5:
+                      link_6:
+                        flange:
+                          tool0:
+                            camera_bottom_screw_frame:
+                              camera_link:
+                                camera_aligned_depth_to_color_frame:
+                                  {}
+                                camera_color_frame:
+                                  {}
+                                camera_depth_frame:
+                                  camera_depth_optical_frame:
+                                    {}
+                                  camera_left_ir_frame:
+                                    camera_left_ir_optical_frame:
+                                      {}
+                                  camera_right_ir_frame:
+                                    camera_right_ir_optical_frame:
+                                      {}
+                                camera_infra1_frame:
+                                  camera_infra1_optical_frame:
+                                    {}
+                                camera_infra2_frame:
+                                  camera_infra2_optical_frame:
+                                    {}
+                            camera_color_optical_frame:
+                              {}
+                            eff_frame:
+                              laser_origin:
+                                {}
+                              quelltech_sensor_optical_frame:
+                                {}
+                              sensors_assembly:
+                                {}
+          table:
+            {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -210,25 +331,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.644041061401367
+      Distance: 3.912738561630249
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.3880618214607239
-        Y: 0.6432966589927673
-        Z: 0.43315058946609497
+        X: 0.19303128123283386
+        Y: 0.6682435870170593
+        Z: 0.5335349440574646
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.49539828300476074
+      Pitch: 0.6203981637954712
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.423580169677734
+      Yaw: 4.9585795402526855
     Saved: ~
 Window Geometry:
   Displays:
