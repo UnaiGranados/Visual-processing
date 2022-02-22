@@ -110,6 +110,7 @@
       <arg name="align_depth" value="true"/>
       <arg name="filters" value="pointcloud"/>
     </include>
+    
     <!-- Load  real camera internal parameters -->
     <rosparam  file="$(find visual_processing)/config/realsense_internal_intrinsic.yaml"/>
     <param name="use_rs_gazebo" value="false"/>

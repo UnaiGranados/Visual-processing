@@ -193,8 +193,6 @@ Visualization Manager:
           Value: true
         base_link:
           Value: true
-        camera_aligned_depth_to_color_frame:
-          Value: true
         camera_bottom_screw_frame:
           Value: true
         camera_color_frame:
@@ -204,14 +202,6 @@ Visualization Manager:
         camera_depth_frame:
           Value: true
         camera_depth_optical_frame:
-          Value: true
-        camera_infra1_frame:
-          Value: true
-        camera_infra1_optical_frame:
-          Value: true
-        camera_infra2_frame:
-          Value: true
-        camera_infra2_optical_frame:
           Value: true
         camera_left_ir_frame:
           Value: true
@@ -247,6 +237,12 @@ Visualization Manager:
           Value: true
         table:
           Value: true
+        tag_frame1:
+          Value: true
+        tag_frame2:
+          Value: true
+        tag_frame3:
+          Value: true
         tool0:
           Value: true
         world:
@@ -271,11 +267,9 @@ Visualization Manager:
                           tool0:
                             camera_bottom_screw_frame:
                               camera_link:
-                                camera_aligned_depth_to_color_frame:
-                                  {}
-                                camera_color_frame:
-                                  {}
                                 camera_depth_frame:
+                                  camera_color_frame:
+                                    {}
                                   camera_depth_optical_frame:
                                     {}
                                   camera_left_ir_frame:
@@ -284,14 +278,13 @@ Visualization Manager:
                                   camera_right_ir_frame:
                                     camera_right_ir_optical_frame:
                                       {}
-                                camera_infra1_frame:
-                                  camera_infra1_optical_frame:
-                                    {}
-                                camera_infra2_frame:
-                                  camera_infra2_optical_frame:
-                                    {}
                             camera_color_optical_frame:
-                              {}
+                              tag_frame1:
+                                {}
+                              tag_frame2:
+                                {}
+                              tag_frame3:
+                                {}
                             eff_frame:
                               laser_origin:
                                 {}
@@ -331,25 +324,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.912738561630249
+      Distance: 3.1714773178100586
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.19303128123283386
-        Y: 0.6682435870170593
-        Z: 0.5335349440574646
+        X: 0.5694006681442261
+        Y: 0.7783097624778748
+        Z: 0.924646258354187
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6203981637954712
+      Pitch: 0.3653981685638428
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.9585795402526855
+      Yaw: 5.093583583831787
     Saved: ~
 Window Geometry:
   Displays:

@@ -10,11 +10,14 @@ import apriltag
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import TransformStamped
+from geometry_msgs.msg import Pose
 import numpy as np
 import yaml
 from colorama import Fore, Back, Style
 import tf
+from visual_processing.srv import  ReturnNumberTags, ReturnNumberTagsResponse
 
+num_tags = 0
 
 def publish_transform(transf, base_link, child_link, time_stamp):
     br = tf2_ros.TransformBroadcaster()
@@ -32,14 +35,11 @@ def publish_transform(transf, base_link, child_link, time_stamp):
     tf_msg.transform.rotation.z = q[3]
     br.sendTransform(tf_msg)
 
-# def tag_results_callback(tags):
-#     print("Returning" + str(tags))
-#     return tags
-
-# def tag_results(number_tags):
-#     rospy.init_node("Tag_results_node")
-#     s=rospy.service("Tag_results",number_tags, tag_results_callback)
-
+def tag_results_callback(req):
+    print("tag_results service called")
+    resp=ReturnNumberTagsResponse()
+    resp.n_tags = num_tags
+    return resp
 
 
 def my_callback(img, pub): 
@@ -72,7 +72,9 @@ def my_callback(img, pub):
     detector = apriltag.Detector(options)
     results = detector.detect(gray)
 
-    # N=tag_results(results)
+    global num_tags
+    num_tags = len(results)
+    print("Num_tags: " + str(num_tags))
 
     # loop over the AprilTag detection results
     T = np.eye(4)
@@ -155,21 +157,30 @@ def my_callback(img, pub):
         #publish the tag frame in ROS
         tf=publish_transform(T,"camera_color_optical_frame" , "tag_frame" + str(i), img.header.stamp)
         i = i+1
-        
 
         
-        # cv2.imshow("rgb camera",cv_image)
+        q = pyq.Quaternion(matrix=T[0:4, 0:4])
 
-        # cv2.waitKey(1)
+        p=Pose()
+        p.position.x=T[0,3]
+        p.position.y=T[1,3]
+        p.position.z=T[2,3]
+        p.orientation.w =q[0]
+        p.orientation.x =q[1]
+        p.orientation.y =q[2]
+        p.orientation.z =q[3]
 
         print("-------------------------------------------------------------------------------")
-
+    
     #publish a OpenCV image to a Ros message
     imgmsg_image = CvBridge().cv2_to_imgmsg(cv_image, encoding="rgb8")
     pub.publish(imgmsg_image)
+    
 
 if __name__ == '__main__':
    rospy.init_node('my_node', anonymous=True)
+   s = rospy.Service("tag_results", ReturnNumberTags, tag_results_callback)
    pub = rospy.Publisher('/my_apriltag_img', Image, queue_size=10)
    image_sub = rospy.Subscriber('/camera/color/image_raw', Image, my_callback, callback_args=pub)
+  
    rospy.spin()

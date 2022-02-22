@@ -171,8 +171,8 @@ class RealSense(object):
                     print (Fore.LIGHTCYAN_EX + "Translation of tag from camera:" + str(P_cam) )
 
                     ##Rotation
-                    X_tag_cam=(ptB_Camara- PtA_Camara)/np.linalg.norm(ptB_Camara - PtA_Camara)
-                    Y_tag_cam=(ptD_Camara-PtA_Camara)/np.linalg.norm(ptD_Camara - PtA_Camara)
+                    X_tag_cam=-(ptB_Camara- PtA_Camara)/np.linalg.norm(ptB_Camara - PtA_Camara)
+                    Y_tag_cam=-(ptD_Camara-PtA_Camara)/np.linalg.norm(ptD_Camara - PtA_Camara)
                     Z_tag_cam=np.cross(Y_tag_cam,X_tag_cam)/np.linalg.norm(np.cross(X_tag_cam,Y_tag_cam))
                     Y_tag_cam=np.cross(Z_tag_cam, X_tag_cam)
                     Mat=np.c_[X_tag_cam,Y_tag_cam,Z_tag_cam,P_cam]

@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
+from ast import Return
 import sys
 import copy
+from tokenize import Double
 import rospy
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
+from  geometry_msgs.msg import Pose
+import numpy as np
 from math import pi
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
@@ -14,8 +18,10 @@ from tf2_ros import TransformListener
 from tf2_ros import Buffer
 import tf
 from rospy import Time
-# from tf_transform_rgb import results
-# from tf_depth import results
+from colorama import Fore, Back, Style
+import pyquaternion as pyq
+from geometry_msgs.msg import TransformStamped
+from visual_processing.srv import  ReturnNumberTags, ReturnNumberTagsResponse
 
 def all_close(goal, actual, tolerance):
   
@@ -32,7 +38,6 @@ def all_close(goal, actual, tolerance):
     return all_close(pose_to_list(goal), pose_to_list(actual), tolerance)
 
   return True
-
 
 class MoveGroupPythonIntefaceTutorial(object):
   
@@ -116,12 +121,12 @@ class MoveGroupPythonIntefaceTutorial(object):
     ## thing we want to do is move it to a slightly better configuration.
     # We can get the joint values from the group and adjust some of the values:
     joint_goal = move_group.get_current_joint_values()
-    joint_goal[0] = 0
-    joint_goal[1] = 0
-    joint_goal[2] = 0
-    joint_goal[3] = 0
-    joint_goal[4] = 0
-    joint_goal[5] = 0.89*pi
+    joint_goal[0] = -0.1*pi
+    joint_goal[1] = 0.1*pi
+    joint_goal[2] = 0.02*pi
+    joint_goal[3] = 0.1*pi
+    joint_goal[4] = 0.1*pi
+    joint_goal[5] = 0.75*pi
 
     # The go command can be called with joint values, poses, or without any
     # parameters if you have already set the pose or joint target for the group
@@ -137,7 +142,7 @@ class MoveGroupPythonIntefaceTutorial(object):
     return all_close(joint_goal, current_joints, 0.01)
 
 
-  def go_to_pose_goal(self):
+  def go_to_pose_goal(self, transform):
     # Copy class variables to local variables to make the web tutorials more clear.
     # In practice, you should use the class variables directly unless you have a good
     # reason not to.
@@ -149,11 +154,16 @@ class MoveGroupPythonIntefaceTutorial(object):
     ## ^^^^^^^^^^^^^^^^^^^^^^^
     ## We can plan a motion for this group to a desired pose for the
     ## end-effector:
+    quat = pyq.Quaternion(matrix=transform[0:4, 0:4])
+
     pose_goal = geometry_msgs.msg.Pose()
-    pose_goal.orientation.w = 1.0
-    pose_goal.position.x = 0.4
-    pose_goal.position.y = 0.1
-    pose_goal.position.z = 0.4
+    pose_goal.orientation.w = quat[0]
+    pose_goal.orientation.x = quat[1]
+    pose_goal.orientation.y = quat[2]
+    pose_goal.orientation.z = quat[3]
+    pose_goal.position.x = transform[0, 3]
+    pose_goal.position.y = transform[1, 3]
+    pose_goal.position.z = transform[2, 3]
 
     move_group.set_pose_target(pose_goal)
 
@@ -188,6 +198,13 @@ def main():
     # tutorial.go_to_pose_goal()
 
     print ("============ Move group completed!=============")
+
+    tfBuffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tfBuffer)
+
+    callback_lambda = lambda x: timer_callback(x, tutorial, tfBuffer)
+    rospy.Timer(rospy.Duration(3), callback_lambda)  
+    rospy.spin()
   
    
   except rospy.ROSInterruptException:
@@ -195,36 +212,68 @@ def main():
   except KeyboardInterrupt:
     return
 
-def timer_callback(event):
+def timer_callback(event, move_group_obj, tfBuffer):
   print ('Timer called at ' + str(event.current_real))
   # rospy.init_node('tf_listener')
-  tfBuffer = tf2_ros.Buffer()
-  listener = tf2_ros.TransformListener(tfBuffer)
+  
   i=1
 
-  # rospy.wait_for_service("Tag_results")
-  # N_tags=rospy.ServiceProxy("Tag_results", number_tags)
-  # print("Tag results:" + str(N_tags))
-  
-  # for r in N_tags:
+  rospy.wait_for_service("tag_results")
+  Number_tags=rospy.ServiceProxy("Tag_results", ReturnNumberTags)
+  print("Tag results:" + str(Number_tags))
+
+  # for r in Number_tags:
+    
   try:   
-    # (trans,rot) = listener.lookupTransform("/base_link", "/tag_frame" + str(i), rospy.Time(0))
-    # trans = tfBuffer.lookup_transform("base_link", "tag_frame1" , rospy.Time(0))   
+    
     trans = tfBuffer.lookup_transform("base_link", "tag_frame" + str(i), rospy.Time.now(), rospy.Duration(2))   
-    print(trans) 
+    trans_current_pose = tfBuffer.lookup_transform("base_link", "tool0", rospy.Time.now(), rospy.Duration(2)) 
+
+    print(str(trans)) 
+    
+    x_t=(trans.transform.translation.x)
+    y_t=(trans.transform.translation.y)
+    z_t=(trans.transform.translation.z)
+    w_q=(trans.transform.rotation.w)
+    x_q=(trans.transform.rotation.x)
+    y_q=(trans.transform.rotation.y)
+    z_q=(trans.transform.rotation.z)
+
+    #rotation_quaternion=np.array([w_q,x_q,y_q,z_q])
+    translation = np.array([[x_t],[y_t],[z_t],[1]])
+    translation_current_pose =  np.array([[trans_current_pose.transform.translation.x],[trans_current_pose.transform.translation.y],[trans_current_pose.transform.translation.z],[1]])
+    #mat=pyq.Quaternion.transformation_matrix(rotation_quaternion)     
+    rotation_quaternion = pyq.Quaternion(np.array([trans_current_pose.transform.rotation.w,trans_current_pose.transform.rotation.x,trans_current_pose.transform.rotation.y,trans_current_pose.transform.rotation.z]))  
+    rotation_quaternion_current_pose = pyq.Quaternion(np.array([w_q,x_q,y_q,z_q]))
+    mat = rotation_quaternion.transformation_matrix
+    mat_current_pose = rotation_quaternion_current_pose.transformation_matrix
+    mat[:,3]=translation.T
+    mat_current_pose[:,3]=translation_current_pose.T
+    distance_to_tag= np.sqrt(mat_current_pose[0,3] + mat_current_pose[1,3] + mat_current_pose[2,3])
+    # pub=rospy.Publisher("/distance_to_tag", Double, queue_size=10)
+    # pub.publish(distance_to_tag)
+    print("Transformation between tag and base_link is:" + str(mat))
+    Trans_goal_tag= np.matrix("1 0 0 0; 0 1 0 0; 0 0 1 0.5; 0 0 0 1")
+    print("Matriz de offset:" + str(Trans_goal_tag))
+    
+    Trans_goal_base=mat * Trans_goal_tag
+    print(Fore.GREEN + "Transformation between goal and base is:" + str(Trans_goal_base) + Style.RESET_ALL)
+
+    
+    move_group_obj.go_to_pose_goal(Trans_goal_base)
+    print ("============ Move group completed!=============")
+
   except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
     print("Transform not available")
 
-    # i=i+1
+  # i=i+1
+  
+  
     
 if __name__ == '__main__':
   main()
-  
-
-  rospy.Timer(rospy.Duration(3), timer_callback)
-  
-  rospy.spin()
  
-
+  
+ 
 
 
