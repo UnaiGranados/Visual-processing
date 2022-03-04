@@ -9,8 +9,8 @@
   <xacro:fanuc_cr7ial prefix="" />
 
   <!-- Import end effector -->
-  <xacro:include filename="$(find flexbotics_cr7ial_support)/urdf/cr7ial_scan_blend_eff_macro.xacro"/>
-  <xacro:sensors_end_effector prefix=""/>
+  <!-- <xacro:include filename="$(find flexbotics_cr7ial_support)/urdf/cr7ial_scan_blend_eff_macro.xacro"/>
+  <xacro:sensors_end_effector prefix=""/> -->
 
   <!-- Table where the robot and calibration plane will be placed -->
   <link name="table">
@@ -45,11 +45,11 @@
   </joint>
 
   <!-- Place sensors end effector on robot flange -->
-  <joint name="robot_tool0_to_sensors_eff" type="fixed">
+  <!-- <joint name="robot_tool0_to_sensors_eff" type="fixed">
     <parent link="tool0"/>
     <child link="eff_frame"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
-  </joint>
+  </joint> -->
 
   <!-- Camera -->
   <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
