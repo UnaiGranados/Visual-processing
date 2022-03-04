@@ -19,7 +19,7 @@
   <!-- FANUC CR-7iA/L configuration and scene URDF -->
   <param name="robot_name" value="$(arg robot_name)"/>
   <param name="$(arg robot_description)" command="$(find xacro)/xacro '$(find flexbotics_cr7ial_support)/urdf/cr7ial_scene.urdf.xacro'" />
-  <param name="$(arg robot_description)_semantic" textfile="$(find flexbotics_cr7ial_moveit_config_2)/config/calibration_scene.srdf" />
+  <param name="$(arg robot_description)_semantic" textfile="$(find flexbotics_cr7ial_moveit_config_6)/config/calibration_scene.srdf" />
   <rosparam command="load" file="$(find fanuc_cr7ia_support)/config/joint_names_cr7ial.yaml" />
 
   <!-- Launch MoveIt! -->
@@ -27,15 +27,15 @@
 
     <!-- Planning context -->
     <group ns="$(arg robot_description)_planning">
-      <rosparam command="load" file="$(find flexbotics_cr7ial_moveit_config_2)/config/joint_limits.yaml"/>
+      <rosparam command="load" file="$(find flexbotics_cr7ial_moveit_config_6)/config/joint_limits.yaml"/>
     </group>
     <group ns="$(arg robot_description)_kinematics">
-      <rosparam command="load" file="$(find flexbotics_cr7ial_moveit_config_2)/config/kinematics.yaml"/>
+      <rosparam command="load" file="$(find flexbotics_cr7ial_moveit_config_6)/config/kinematics.yaml"/>
     </group>
 
     <!-- Move group -->
     <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
-    <include file="$(find flexbotics_cr7ial_moveit_config_2)/launch/move_group.launch">
+    <include file="$(find flexbotics_cr7ial_moveit_config_6)/launch/move_group.launch">
       <arg name="allow_trajectory_execution" value="true"/>
       <arg name="fake_execution" value="false"/>
       <arg name="execution_type" value="interpolate"/>
