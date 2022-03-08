@@ -41,7 +41,6 @@ def tag_results_callback(req):
     resp.n_tags = num_tags
     return resp
 
-
 def my_callback(img, pub): 
   
     if  rospy.get_param("use_rs_gazebo"):
@@ -100,7 +99,6 @@ def my_callback(img, pub):
         cv2.putText(cv_image,  "ID:" + str(tagID), (ptA[0] - 30, ptA[1] - 5),
         cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 0, 255), 2)
         
-
         print ("[INFO] tag family: {}".format(tagFamily))
         print("[INFO] tag ID: {}".format(tagID))
         print(Fore.YELLOW +"Pixel coordinates:")
@@ -157,7 +155,6 @@ def my_callback(img, pub):
         #publish the tag frame in ROS
         tf=publish_transform(T,"camera_color_optical_frame" , "tag_frame" + str(i), img.header.stamp)
         i = i+1
-
         
         q = pyq.Quaternion(matrix=T[0:4, 0:4])
 
@@ -175,12 +172,10 @@ def my_callback(img, pub):
     #publish a OpenCV image to a Ros message
     imgmsg_image = CvBridge().cv2_to_imgmsg(cv_image, encoding="rgb8")
     pub.publish(imgmsg_image)
-    
 
 if __name__ == '__main__':
    rospy.init_node('my_node', anonymous=True)
    s = rospy.Service("tag_results", ReturnNumberTags, tag_results_callback)
    pub = rospy.Publisher('/my_apriltag_img', Image, queue_size=10)
    image_sub = rospy.Subscriber('/camera/color/image_raw', Image, my_callback, callback_args=pub)
-  
    rospy.spin()

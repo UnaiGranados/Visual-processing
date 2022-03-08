@@ -23,6 +23,22 @@ import pyquaternion as pyq
 from geometry_msgs.msg import TransformStamped
 from visual_processing.srv import  ReturnNumberTags, ReturnNumberTagsResponse
 
+def publish_transform(transf, base_link, child_link, time_stamp):
+  br = tf2_ros.TransformBroadcaster()
+  tf_msg = TransformStamped()
+  tf_msg.header.stamp = time_stamp
+  tf_msg.header.frame_id = base_link
+  tf_msg.child_frame_id = child_link
+  tf_msg.transform.translation.x = transf[0, 3]
+  tf_msg.transform.translation.y = transf[1, 3]
+  tf_msg.transform.translation.z = transf[2, 3]
+  q = pyq.Quaternion(matrix=transf[0:3, 0:3])
+  tf_msg.transform.rotation.w = q[0]
+  tf_msg.transform.rotation.x = q[1]
+  tf_msg.transform.rotation.y = q[2]
+  tf_msg.transform.rotation.z = q[3]
+  br.sendTransform(tf_msg)
+
 def all_close(goal, actual, tolerance):
   
   all_equal = True
@@ -231,10 +247,10 @@ def main():
     tfBuffer = tf2_ros.Buffer()
     listener = tf2_ros.TransformListener(tfBuffer)
     
-    rospy.wait_for_service("tag_results")
-    number_tags_sp=rospy.ServiceProxy("tag_results", ReturnNumberTags)
+    # rospy.wait_for_service("tag_results")
+    # number_tags_sp=rospy.ServiceProxy("tag_results", ReturnNumberTags)
 
-    callback_lambda = lambda x: timer_callback(x, tutorial, tfBuffer, number_tags_sp)
+    callback_lambda = lambda x: timer_callback(x, tutorial, tfBuffer)
     
     rospy.Timer(rospy.Duration(1), callback_lambda)  
     rospy.spin()
@@ -245,12 +261,12 @@ def main():
     return
 
 
-def timer_callback(event, move_group_obj, tfBuffer, number_tags_sp):
+def timer_callback(event, move_group_obj, tfBuffer):
   print ('Timer called at ' + str(event.current_real))
   
-  Number_tags=number_tags_sp()
+  # Number_tags=number_tags_sp()
 
-  print("Tag results:" + str(Number_tags.n_tags))
+  # print("Tag results:" + str(Number_tags.n_tags))
 
   # if Number_tags.n_tags >=1:
   #   i = 1
@@ -308,10 +324,10 @@ def timer_callback(event, move_group_obj, tfBuffer, number_tags_sp):
     Trans_goal_base[:3, 3] = Trans_tag_goal_base[:3, 3]
     Trans_goal_world = np.dot(mat_base_world,Trans_goal_base)
     print(Fore.GREEN + "Transformation between goal and world is:" + str(Trans_goal_world) + Style.RESET_ALL)
-
+    t_goal_tag =  publish_transform(Trans_goal_tag,"tag_frame1", "goal", rospy.Time.now())
     move_group_obj.go_to_pose_goal(Trans_goal_world)
     print(Fore.RED + "Transformation between goal and base is:" + str( Trans_tag_goal_base) + Style.RESET_ALL)
-    print(Fore.MAGENTA + "Transformation between  is:" + str( Trans_goal_base) + Style.RESET_ALL)
+    print(Fore.MAGENTA + "Transformation between  is:" + str(Trans_goal_base) + Style.RESET_ALL)
     
 
     print ("============ Move group completed!=============")

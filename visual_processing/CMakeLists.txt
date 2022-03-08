@@ -165,7 +165,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  src/tf_transform_rgb.py src/moveit_move_group.py
+  src/tf_depth3.py src/tf_transform_rgb.py src/moveit_move_group.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -210,6 +210,6 @@ catkin_install_python(PROGRAMS
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-catkin_install_python(PROGRAMS src/tf_transform_rgb.py
+catkin_install_python(PROGRAMS src/tf_depth3.py src/tf_transform_rgb.py src/moveit_move_group.py 
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
