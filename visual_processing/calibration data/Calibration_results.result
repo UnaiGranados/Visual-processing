@@ -1,0 +1,11 @@
+group: manipulator
+image_topic: /camera/color/image_raw
+
+hand_eye_calibration:
+  type: eye-in-hand
+  x: 0.0227314
+  y: -0.13064
+  z: 0.103315
+  roll: -0.0545606
+  pitch: -0.000359641
+  yaw: 0.430265

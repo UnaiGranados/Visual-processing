@@ -12,6 +12,10 @@
   <!-- <xacro:include filename="$(find flexbotics_cr7ial_support)/urdf/cr7ial_scan_blend_eff_macro.xacro"/>
   <xacro:sensors_end_effector prefix=""/> -->
 
+  <!-- Import end effector -->
+  <!-- <xacro:include filename="$(find flexbotics_cr7ial_support)/urdf/PhoXi3Dscanner.xacro"/>
+  <xacro:PhoXi3Dscanner prefix=""/> -->
+
   <!-- Table where the robot and calibration plane will be placed -->
   <link name="table">
     <visual>
@@ -54,7 +58,7 @@
   <!-- Camera -->
   <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
   <xacro:sensor_d435 name="camera" parent="tool0" >
-	  <origin xyz="0.13 -0.045 0.13" rpy="3.14 -0.031 -0.34" />
+	  <origin xyz=" 0.02268366 -0.0958564   0.07088306" rpy=" 1.59691407 -1.56299734  0.39588142" />
 	</xacro:sensor_d435>
 
   <gazebo reference="camera_link">

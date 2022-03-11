@@ -138,11 +138,10 @@ class MoveGroupPythonIntefaceTutorial(object):
     # We can get the joint values from the group and adjust some of the values:
     joint_goal = move_group.get_current_joint_values()
     joint_goal[0] = 0
-    joint_goal[1] = 0
     joint_goal[2] = 0
     joint_goal[3] = 0
-    joint_goal[4] = 0
-    joint_goal[5] = 0.89*pi
+    joint_goal[4] = -0.46 * pi
+    joint_goal[5] = -0.38 * pi
 
     # The go command can be called with joint values, poses, or without any
     # parameters if you have already set the pose or joint target for the group
@@ -222,6 +221,9 @@ class MoveGroupPythonIntefaceTutorial(object):
 
     ## Now, we call the planner to compute the plan and execute it.
     plan = move_group.go(wait=True)
+    
+    # if current_pose.position.x == pose_goal.position.x and current_pose.position.y == pose_goal.position.y and current_pose.position.z == pose_goal.position.z :
+
     # Calling `stop()` ensures that there is no residual movement
     move_group.stop()
     # It is always good to clear your targets after planning with poses.
@@ -275,69 +277,92 @@ def timer_callback(event, move_group_obj, tfBuffer):
   try:   
     
     #Read tf transformations
-    trans = tfBuffer.lookup_transform("base_link", "tag_frame1", rospy.Time.now(), rospy.Duration(2))   
-    trans_current_pose = tfBuffer.lookup_transform("base_link", "tool0", rospy.Time.now(), rospy.Duration(2)) 
-    trans_base_link = tfBuffer.lookup_transform("world", "base_link", rospy.Time.now(), rospy.Duration(2))   
-    trans_distance = tfBuffer.lookup_transform("tool0", "tag_frame1", rospy.Time.now(), rospy.Duration(2))
-    print(str(trans_current_pose)) 
+    base_T_tag = tfBuffer.lookup_transform("base_link", "tag_frame1", rospy.Time.now(), rospy.Duration(2))   
+    base_T_tool0 = tfBuffer.lookup_transform("base_link", "tool0", rospy.Time.now(), rospy.Duration(2)) 
+    world_T_base = tfBuffer.lookup_transform("world", "base_link", rospy.Time.now(), rospy.Duration(2))   
+    T_distance = tfBuffer.lookup_transform("tool0", "tag_frame1", rospy.Time.now(), rospy.Duration(2))
+    world_T_opt = tfBuffer.lookup_transform("world","camera_color_optical_frame",  rospy.Time.now(), rospy.Duration(2))
+    tool0_T_opt = tfBuffer.lookup_transform("tool0","camera_color_optical_frame",  rospy.Time.now(), rospy.Duration(2))
+    
+    print(str(base_T_tool0)) 
     
     #Compute translations
-    translation = np.array([[trans.transform.translation.x],[trans.transform.translation.y],[trans.transform.translation.z],[1]])
-    translation_current_pose =  np.array([[trans_current_pose.transform.translation.x],[trans_current_pose.transform.translation.y],[trans_current_pose.transform.translation.z],[1]])
-    translation_base_link = np.array([[trans_base_link.transform.translation.x],[trans_base_link.transform.translation.y],[trans_base_link.transform.translation.z],[1]])
-    translation_distance = np.array([[trans_distance.transform.translation.x],[trans_distance.transform.translation.y],[trans_distance.transform.translation.z],[1]])  
+    base_P_tag = np.array([[base_T_tag.transform.translation.x],[base_T_tag.transform.translation.y],[base_T_tag.transform.translation.z],[1]])
+    base_P_tool0 =  np.array([[base_T_tool0.transform.translation.x],[base_T_tool0.transform.translation.y],[base_T_tool0.transform.translation.z],[1]])
+    world_P_base = np.array([[world_T_base.transform.translation.x],[world_T_base.transform.translation.y],[world_T_base.transform.translation.z],[1]])
+    P_distance = np.array([[T_distance.transform.translation.x],[T_distance.transform.translation.y],[T_distance.transform.translation.z],[1]])  
+    world_P_opt = np.array([[world_T_opt.transform.translation.x],[world_T_opt.transform.translation.y],[world_T_opt.transform.translation.z],[1]])
+    tool0_P_opt = np.array([[tool0_T_opt.transform.translation.x],[tool0_T_opt.transform.translation.y],[tool0_T_opt.transform.translation.z],[1]])
 
     #Compute rotations
-    rotation_quaternion = pyq.Quaternion(np.array([trans.transform.rotation.w,trans.transform.rotation.x,trans.transform.rotation.y,trans.transform.rotation.z]))
-    rotation_quaternion_current_pose = pyq.Quaternion(np.array([trans_current_pose.transform.rotation.w,trans_current_pose.transform.rotation.x,trans_current_pose.transform.rotation.y,trans_current_pose.transform.rotation.z]))  
-    rotation_quaternion_base_link = pyq.Quaternion(np.array([trans_base_link.transform.rotation.w,trans_base_link.transform.rotation.x,trans_base_link.transform.rotation.y,trans_base_link.transform.rotation.z]))
-    rotation_quaternion_distance = pyq.Quaternion(np.array([trans_distance.transform.rotation.w,trans_distance.transform.rotation.x,trans_distance.transform.rotation.y,trans_distance.transform.rotation.z]))
+    tag_R_base = pyq.Quaternion(np.array([base_T_tag.transform.rotation.w,base_T_tag.transform.rotation.x,base_T_tag.transform.rotation.y,base_T_tag.transform.rotation.z]))
+    tool0_R_base = pyq.Quaternion(np.array([base_T_tool0.transform.rotation.w,base_T_tool0.transform.rotation.x,base_T_tool0.transform.rotation.y,base_T_tool0.transform.rotation.z]))  
+    world_R_base = pyq.Quaternion(np.array([world_T_base.transform.rotation.w,world_T_base.transform.rotation.x,world_T_base.transform.rotation.y,world_T_base.transform.rotation.z]))
+    R_distance = pyq.Quaternion(np.array([T_distance.transform.rotation.w,T_distance.transform.rotation.x,T_distance.transform.rotation.y,T_distance.transform.rotation.z]))
+    world_R_opt = pyq.Quaternion(np.array([world_T_opt.transform.rotation.w,world_T_opt.transform.rotation.x,world_T_opt.transform.rotation.y,world_T_opt.transform.rotation.z]))
+    tool0_R_opt = pyq.Quaternion(np.array([tool0_T_opt.transform.rotation.w,tool0_T_opt.transform.rotation.x,tool0_T_opt.transform.rotation.y,tool0_T_opt.transform.rotation.z]))
     
     #Transformation matrix
-    mat = rotation_quaternion.transformation_matrix
-    mat_current_pose = rotation_quaternion_current_pose.transformation_matrix
-    mat_base_world = rotation_quaternion_base_link.transformation_matrix
-    mat_distance =  rotation_quaternion_distance.transformation_matrix
-    mat[:,3]=translation.T
-    mat_current_pose[:,3]=translation_current_pose.T
-    mat_base_world[:,3]=translation_base_link.T
-    mat_distance[:,3]=translation_distance.T
-
+    base_T_tag = tag_R_base.transformation_matrix
+    base_T_tool0 = tool0_R_base.transformation_matrix
+    world_T_base = world_R_base.transformation_matrix
+    T_distance =  R_distance.transformation_matrix
+    world_T_opt = world_R_opt.transformation_matrix
+    tool0_T_opt = tool0_R_opt.transformation_matrix
+    base_T_tag[:,3]=base_P_tag.T
+    base_T_tool0[:,3]=base_P_tool0.T
+    world_T_base[:,3]=world_P_base.T
+    T_distance[:,3]=P_distance.T
+    world_T_opt[:,3]=world_P_opt.T
+    tool0_T_opt[:,3]=tool0_P_opt.T
+    
     #Calculate distance between tag and tool
     # distance_to_tag= np.sqrt(mat_distance[0,3] + mat_distance[1,3] + mat_distance[2,3])
     # pub=rospy.Publisher("/distance_to_tag", Double, queue_size=10)
     # pub.publish(distance_to_tag)
 
-    print(Fore.YELLOW + "Transformation between tag and base_link is:" + str(mat))
-    print("Transformation between tool0 and base_link is:" + str(mat_current_pose))
-    print("Transformation between world and base_link is:" + str(mat_base_world) + Style.RESET_ALL)
+    print(Fore.YELLOW + "Transformation between tag and base_link is:" + str(base_T_tag))
+    print("Transformation between tool0 and base_link is:" + str(base_T_tool0))
+    print("Transformation between world and base_link is:" + str(world_T_base) + Style.RESET_ALL)
 
     #Create an offset matrix
-    Trans_goal_tag= np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.5], [0, 0, 0, 1]])
-    print("Matriz de offset:" + str(Trans_goal_tag))
+    tag_T_goal= np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.5], [0, 0, 0, 1]])
+    print("Matriz de offset:" + str(tag_T_goal))
 
     #Calculate transformation matrix between world and goal and move robot to goal
-    Trans_tag_goal_base=np.dot(mat, Trans_goal_tag)
-    Trans_goal_base = np.eye(4)
-    print(Trans_goal_base.shape)
-    Trans_goal_base[:3, :3] = mat_current_pose[:3, :3]
-    Trans_goal_base[:3, 3] = Trans_tag_goal_base[:3, 3]
-    Trans_goal_world = np.dot(mat_base_world,Trans_goal_base)
-    print(Fore.GREEN + "Transformation between goal and world is:" + str(Trans_goal_world) + Style.RESET_ALL)
-    t_goal_tag =  publish_transform(Trans_goal_tag,"tag_frame1", "goal", rospy.Time.now())
-    move_group_obj.go_to_pose_goal(Trans_goal_world)
-    print(Fore.RED + "Transformation between goal and base is:" + str( Trans_tag_goal_base) + Style.RESET_ALL)
-    print(Fore.MAGENTA + "Transformation between  is:" + str(Trans_goal_base) + Style.RESET_ALL)
+    base_T_goal=np.dot(base_T_tag, tag_T_goal)
+    base_T_goal_no_rotation = np.eye(4)
+    base_T_goal_no_rotation[:3, :3] = base_T_tool0[:3, :3]
+    base_T_goal_no_rotation[:3, 3] = base_T_goal[:3, 3]
+    world_T_goal = np.dot(world_T_base,base_T_goal_no_rotation)
+    print(Fore.GREEN + "Transformation between goal and world is:" + str(world_T_goal) + Style.RESET_ALL)
+    t_goal_tag =  publish_transform(tag_T_goal,"tag_frame1", "goal", rospy.Time.now())
+    
+    world_T_tool0=np.dot(world_T_opt,tool0_T_opt)
+    print(Fore.GREEN + "Transformation between opt and world is:" + str(world_T_opt) + Style.RESET_ALL)
+    print(Fore.GREEN + "Transformation between opt and tool is:" + str(tool0_T_opt) + Style.RESET_ALL)
+    print(Fore.GREEN + "Transformation between tool and world is:" + str(world_T_tool0) + Style.RESET_ALL)
+
+    opt_T_goal=np.dot(world_T_opt, np.linalg.inv(world_T_goal))
+
+    opt_T_goal[:3, :3] = world_T_opt[:3, :3]
+    opt_T_goal[:3, 3] = world_T_goal[:3, 3]
     
 
+    world_T_tool = np.dot(opt_T_goal, np.linalg.inv(tool0_T_opt))
+    move_group_obj.go_to_pose_goal(world_T_tool)
+    # move_group_obj.go_to_pose_goal(tr)
+    
+    print(Fore.RED + "Transformation between goal and base is:" + str(base_T_goal) + Style.RESET_ALL)
+    
+    print(Fore.YELLOW + "Transformation between goal and world is:" + str(world_T_goal) + Style.RESET_ALL)
     print ("============ Move group completed!=============")
 
   except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
     print("Transform not available")
   
   # i=i+1
-  
-  
+    
 if __name__ == '__main__':
   main()
  

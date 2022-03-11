@@ -3,13 +3,13 @@
 
   <!-- Input arguments. If "use_sim" not specified will run in simulation mode -->
   <arg name="use_sim" default="true" />
-  <arg name="use_gazebo" default="false" />
-  <arg name="use_moveit" default="false" />
-  <arg name="use_mc" default="true" />
+  <arg name="use_gazebo" default="true" />
+  <arg name="use_moveit" default="true" />
+  <arg name="use_mc" default="false" />
   <arg name="robot_ip" unless="$(arg use_sim)" default="192.168.0.2"/>
   <arg name="launch_rviz" default="true" />
   <arg name="rviz_config" default="$(find flexbotics_cr7ial_support)/launch/cr7ial_scene.rviz" />
-  <arg name="use_rs_gazebo" default="false" />
+  <arg name="use_rs_gazebo" default="true" />
   <arg name="rgb_method" default="true" />
 
   <arg name="robot_name" value="calibration_scene"/>
@@ -140,10 +140,12 @@
   </group>
 
   <!-- camera -->
-  <node pkg="tf" type="static_transform_publisher" name="arm_camera_to_flange" args="0.13 -0.079 0.118 1.224 -0.005 1.539 tool0 camera_color_optical_frame 100"/>
+  <!-- <node pkg="tf" type="static_transform_publisher" name="arm_camera_to_flange" args="0.009 -0.102 0.071 0.000 0.008 0.422 tool0 camera_color_optical_frame 100"/>  -->
+  
   <!-- <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/> -->
 
   <!-- Move group -->
+
   <!-- <node name="moveit_move_group" pkg="visual_processing" type="moveit_move_group.py" respawn="false" output="screen">
   </node>  -->
     
