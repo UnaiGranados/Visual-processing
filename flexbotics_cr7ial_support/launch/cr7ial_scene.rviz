@@ -8,7 +8,6 @@ Panels:
         - /Status1
         - /TF1
         - /TF1/Frames1
-        - /TF1/Frames1/goal1
       Splitter Ratio: 0.5
     Tree Height: 755
   - Class: rviz/Selection
@@ -199,8 +198,6 @@ Visualization Manager:
           Value: false
         flange:
           Value: false
-        goal:
-          Value: true
         link_1:
           Value: false
         link_2:
@@ -215,8 +212,6 @@ Visualization Manager:
           Value: false
         table:
           Value: false
-        tag_frame1:
-          Value: true
         tool0:
           Value: true
         world:
@@ -244,9 +239,7 @@ Visualization Manager:
                                 camera_depth_frame:
                                   camera_color_frame:
                                     camera_color_optical_frame:
-                                      tag_frame1:
-                                        goal:
-                                          {}
+                                      {}
                                   camera_depth_optical_frame:
                                     {}
                                   camera_left_ir_frame:

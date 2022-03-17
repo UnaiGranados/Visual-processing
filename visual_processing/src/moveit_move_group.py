@@ -64,7 +64,7 @@ class MoveGroupPythonIntefaceTutorial(object):
     ##
     ## First initialize `moveit_commander`_ and a `rospy`_ node:
     moveit_commander.roscpp_initialize(sys.argv)
-    rospy.init_node('move_group_python_interface_tutorial', anonymous=True)
+    rospy.init_node('move_group_node', anonymous=True)
 
     ## Instantiate a `RobotCommander`_ object. Provides information such as the robot's
     ## kinematic model and the robot's current joint states
@@ -138,9 +138,10 @@ class MoveGroupPythonIntefaceTutorial(object):
     # We can get the joint values from the group and adjust some of the values:
     joint_goal = move_group.get_current_joint_values()
     joint_goal[0] = 0
+    joint_goal[1] = 0
     joint_goal[2] = 0
     joint_goal[3] = 0
-    joint_goal[4] = -0.46 * pi
+    joint_goal[4] = -0.5 * pi
     joint_goal[5] = -0.38 * pi
 
     # The go command can be called with joint values, poses, or without any
@@ -222,13 +223,13 @@ class MoveGroupPythonIntefaceTutorial(object):
     ## Now, we call the planner to compute the plan and execute it.
     plan = move_group.go(wait=True)
     
-    # if current_pose.position.x == pose_goal.position.x and current_pose.position.y == pose_goal.position.y and current_pose.position.z == pose_goal.position.z :
+    if current_pose.position.x == pose_goal.position.x and current_pose.position.y == pose_goal.position.y and current_pose.position.z == pose_goal.position.z :
 
-    # Calling `stop()` ensures that there is no residual movement
-    move_group.stop()
-    # It is always good to clear your targets after planning with poses.
-    # Note: there is no equivalent function for clear_joint_value_targets()
-    move_group.clear_pose_targets()
+      # Calling `stop()` ensures that there is no residual movement
+      move_group.stop()
+      # It is always good to clear your targets after planning with poses.
+      # Note: there is no equivalent function for clear_joint_value_targets()
+      move_group.clear_pose_targets()
 
     ## END_SUB_TUTORIAL
 
@@ -344,17 +345,13 @@ def timer_callback(event, move_group_obj, tfBuffer):
     print(Fore.GREEN + "Transformation between tool and world is:" + str(world_T_tool0) + Style.RESET_ALL)
 
     opt_T_goal=np.dot(world_T_opt, np.linalg.inv(world_T_goal))
-
     opt_T_goal[:3, :3] = world_T_opt[:3, :3]
     opt_T_goal[:3, 3] = world_T_goal[:3, 3]
     
-
     world_T_tool = np.dot(opt_T_goal, np.linalg.inv(tool0_T_opt))
     move_group_obj.go_to_pose_goal(world_T_tool)
-    # move_group_obj.go_to_pose_goal(tr)
-    
+  
     print(Fore.RED + "Transformation between goal and base is:" + str(base_T_goal) + Style.RESET_ALL)
-    
     print(Fore.YELLOW + "Transformation between goal and world is:" + str(world_T_goal) + Style.RESET_ALL)
     print ("============ Move group completed!=============")
 

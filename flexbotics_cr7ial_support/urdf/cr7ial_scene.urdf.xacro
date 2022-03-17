@@ -12,10 +12,6 @@
   <!-- <xacro:include filename="$(find flexbotics_cr7ial_support)/urdf/cr7ial_scan_blend_eff_macro.xacro"/>
   <xacro:sensors_end_effector prefix=""/> -->
 
-  <!-- Import end effector -->
-  <!-- <xacro:include filename="$(find flexbotics_cr7ial_support)/urdf/PhoXi3Dscanner.xacro"/>
-  <xacro:PhoXi3Dscanner prefix=""/> -->
-
   <!-- Table where the robot and calibration plane will be placed -->
   <link name="table">
     <visual>

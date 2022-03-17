@@ -174,7 +174,7 @@ def my_callback(img, pub):
     pub.publish(imgmsg_image)
 
 if __name__ == '__main__':
-   rospy.init_node('my_node', anonymous=True)
+   rospy.init_node('my_vision_node_rgb', anonymous=True)
    s = rospy.Service("tag_results", ReturnNumberTags, tag_results_callback)
    pub = rospy.Publisher('/my_apriltag_img', Image, queue_size=10)
    image_sub = rospy.Subscriber('/camera/color/image_raw', Image, my_callback, callback_args=pub)

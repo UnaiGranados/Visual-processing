@@ -207,7 +207,7 @@ class RealSense(object):
 def main():
 
     my_node = RealSense()
-    rospy.init_node("tf_transform_rgb_depth", anonymous=True)
+    rospy.init_node("my_vision_node_depth", anonymous=True)
     ts = message_filters.ApproximateTimeSynchronizer([my_node.rgb_sub, my_node.depth_sub], 10, 0.1)
     ts.registerCallback(my_node.callback)
     # spin() simply keeps python from exiting until this node is stopped
