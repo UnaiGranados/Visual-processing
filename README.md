@@ -37,7 +37,7 @@ $ cd <ws_folder>
 
 ```shell
 <ws_folder> $ cd src
-<ws_folder>/src $ git clone git@git.code.tecnalia.com:tecnalia_robotics/internships/unai-granados/fanuc_3d_cam.git
+<ws_folder>/src $ git clone https://github.com/UnaiGranados/Visual-processing.git
 ```
 
 ### 2.4. Synchronize depencies
