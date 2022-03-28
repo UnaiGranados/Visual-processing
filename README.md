@@ -4,11 +4,6 @@ This ROS metapackage contains specific robot setup configuration, tag detections
 
 ## 1. Dependencies
 
-Tecnalia repositories:
-
-* `algebra_libraries`
-* `manipulation`
-
 
 Additional dependencies:
 
@@ -101,22 +96,6 @@ By default simulation will be visualized on Gazebo with a simulated RealSense D4
 ```shell
 $ roslaunch flexbotics_cr7ial_support set_up_cr7ial_scene.launch use_gazebo:=false use_rs_gazebo:=false
 ```
-
-By default moveit is used to move the robot. To use manipulator commander set `use_mc` to `true` and  `use_moveit` to `false`.
-
-
-For instructions about how to use the real robot see the [tecnalia_robotics/fanuc/Documentation](https://git.code.tecnalia.com/tecnalia_robotics/fanuc/documentation) repository.
-
-### 4.2. Camera calibration
-
-There is a package that has been implemented to calibrate the RealSense D435 depth camera, see the [tecnalia_robotics/flexbotics_calibration_suite](https://git.code.tecnalia.com/tecnalia_robotics/flexbotics_calibration_suite) repository.
-
-First, launch the following launchfile:
-
-```shell
-$ roslaunch flexbotics_calibration_suite flexbotics_calibration_suite.launch
-```
-With this launch, a GUI will open.Then choose the type of calibration needed and start the the calibration procedure. [manipulator_commander] is needed for the calibration.
 
 ### 4.3. Tag detection
 
